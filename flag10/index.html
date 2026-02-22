@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flag 10 | Simple Notes Challenge</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+            font-family: 'Segoe UI', sans-serif;
+            color: #e2e8f0;
+            padding: 30px 16px;
+        }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 48px 56px;
+            text-align: center;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            max-width: 540px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            color: #f1f5f9;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: #64748b;
+            margin-bottom: 34px;
+            line-height: 1.6;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: #0891b2;
+            color: #ecfeff;
+            text-decoration: none;
+            border-radius: 8px;
+            padding: 12px 32px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            transition: background 0.2s;
+        }
+
+        .download-btn:hover {
+            background: #06b6d4;
+        }
+
+        .hint {
+            background: #083344;
+            border-left: 3px solid #06b6d4;
+            border-radius: 6px;
+            padding: 14px 18px;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #a5f3fc;
+            line-height: 1.7;
+        }
+
+        .hint span {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #06b6d4;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .tools {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tool-tag {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 999px;
+            padding: 5px 14px;
+            font-size: 0.78rem;
+            color: #94a3b8;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>📝 Flag 10 — Plain Sight</h1>
+        <p class="subtitle">
+            A simple text file containing the final flag.<br>
+            No encryption, no metadata, just plain investigation.
+        </p>
+        <a class="download-btn" href="notes.txt" download="notes.txt">
+            📄 Download notes.txt
+        </a>
+        <div class="hint">
+            <span>💡 Hint</span>
+            Always read the documents carefully.
+            Important information is often hidden in plain sight,
+            amongst daily reminders and mundane lists.
+        </div>
+        <div class="tools">
+            <span class="tool-tag">Notepad</span>
+            <span class="tool-tag">grep</span>
+            <span class="tool-tag">Reading</span>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flag 4 | Caesar Cipher Challenge</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+            font-family: 'Segoe UI', sans-serif;
+            color: #e2e8f0;
+        }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 52px 60px;
+            text-align: center;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            max-width: 580px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            color: #f1f5f9;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: #64748b;
+            margin-bottom: 36px;
+        }
+
+        .label {
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #475569;
+            margin-bottom: 10px;
+        }
+
+        .cipher-box {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 18px 24px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            color: #f97316;
+            word-break: break-all;
+            letter-spacing: 0.05em;
+            cursor: text;
+            user-select: all;
+        }
+
+        .copy-btn {
+            margin-top: 20px;
+            background: #c2410c;
+            color: #fff7ed;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 28px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #ea580c;
+        }
+
+        .copy-btn:active {
+            background: #9a3412;
+        }
+
+        .copied-msg {
+            display: none;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #4ade80;
+        }
+
+        .hint {
+            margin-top: 28px;
+            background: #1a1a2e;
+            border-left: 3px solid #f97316;
+            border-radius: 6px;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #fdba74;
+            line-height: 1.6;
+        }
+
+        .hint span {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #f97316;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .shift-visual {
+            margin-top: 28px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .shift-item {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .shift-item span {
+            color: #f97316;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>🔑 Flag 4 — Shift It Back!</h1>
+        <p class="subtitle">This message was scrambled using a classic cipher. Can you reverse it?</p>
+
+        <p class="label">Encrypted Text</p>
+        <div class="cipher-box" id="cipherText">
+            DUWLPDV{fdhvdu_flskhu_fudfnhg}
+        </div>
+
+        <button class="copy-btn" onclick="copyText()">📋 Copy Text</button>
+        <p class="copied-msg" id="copiedMsg">✅ Copied to clipboard!</p>
+
+        <div class="hint">
+            <span>💡 Hint</span>
+            Julius Caesar famously used this technique to protect his messages.
+            Each letter has been shifted by a small, single-digit number in the alphabet.
+            Try shifting it back!
+        </div>
+
+        <div class="shift-visual">
+            <div class="shift-item">A → <span>D</span></div>
+            <div class="shift-item">B → <span>E</span></div>
+            <div class="shift-item">C → <span>F</span></div>
+            <div class="shift-item">... → <span>...</span></div>
+            <div class="shift-item">Z → <span>C</span></div>
+        </div>
+    </div>
+
+    <script>
+        function copyText() {
+            const text = document.getElementById('cipherText').innerText.trim();
+            navigator.clipboard.writeText(text).then(() => {
+                const msg = document.getElementById('copiedMsg');
+                msg.style.display = 'block';
+                setTimeout(() => msg.style.display = 'none', 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>

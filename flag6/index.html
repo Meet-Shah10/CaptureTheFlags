@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flag 6 | OSINT Username Challenge</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+            font-family: 'Segoe UI', sans-serif;
+            color: #e2e8f0;
+            padding: 30px 16px;
+        }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 48px 56px;
+            text-align: center;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            max-width: 560px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            color: #f1f5f9;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: #64748b;
+            margin-bottom: 36px;
+            line-height: 1.6;
+        }
+
+        .label {
+            font-size: 0.74rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #475569;
+            margin-bottom: 10px;
+        }
+
+        .username-box {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 18px 24px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #34d399;
+            letter-spacing: 0.06em;
+            cursor: text;
+            user-select: all;
+            margin-bottom: 28px;
+        }
+
+        .platforms {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .platform-tag {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 7px 16px;
+            font-size: 0.82rem;
+            color: #94a3b8;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .platform-tag:hover {
+            border-color: #34d399;
+            color: #34d399;
+        }
+
+        .hint {
+            background: #0d2818;
+            border-left: 3px solid #34d399;
+            border-radius: 6px;
+            padding: 14px 18px;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #6ee7b7;
+            line-height: 1.7;
+        }
+
+        .hint span {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #34d399;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>🕵️ Flag 6 — Trace the User</h1>
+        <p class="subtitle">
+            We know someone goes by this username online.<br>
+            They left something public — you just have to find it.
+        </p>
+
+        <p class="label">Target Username</p>
+        <div class="username-box">artimas_ctf_player</div>
+
+        <div class="platforms">
+            <span class="platform-tag">GitHub</span>
+            <span class="platform-tag">Pastebin</span>
+            <span class="platform-tag">Gist</span>
+            <span class="platform-tag">Twitter / X</span>
+            <span class="platform-tag">Reddit</span>
+        </div>
+
+        <div class="hint">
+            <span>💡 Hint</span>
+            OSINT investigators always check where a username appears across platforms.
+            This person published something publicly on a code-sharing platform.
+            The flag format is <code style="color:#f1f5f9">ARTIMAS{...}</code>.
+        </div>
+    </div>
+</body>
+
+</html>

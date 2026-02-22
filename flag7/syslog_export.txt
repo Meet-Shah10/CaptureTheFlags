@@ -1,0 +1,56 @@
+SYSTEM LOG EXPORT — Version 3.1.4
+Session ID: 4f8a2c91-bb3d-4e17-9c82-d1a057f3e6b2
+Timestamp: 2024-02-14T08:42:11Z
+Host: srv-node-042.internal
+------------------------------------------------------------
+
+[INFO]  Kernel boot sequence initiated.
+[INFO]  Loading hardware abstraction layer... OK
+[INFO]  Memory test: 16384 MB detected, 16378 MB usable.
+[WARN]  Thermal sensor on CPU core 3 returned anomalous reading: 94°C. Retrying...
+[INFO]  Thermal sensor retry OK. Reading normalized: 62°C.
+[INFO]  Network interface eth0 initialized. MAC: 3c:a9:f4:12:88:ad
+[INFO]  Assigned IP: 10.42.0.17 via DHCP (lease: 86400s)
+[INFO]  DNS resolved: ns1.internal → 10.0.0.1
+
+[INFO]  Starting service: syslogd      [PID 1021]
+[INFO]  Starting service: crond        [PID 1034]
+[INFO]  Starting service: sshd         [PID 1041]
+[WARN]  SSH host key not found. Generating new RSA-4096 key...
+[INFO]  SSH host key generated. Fingerprint: SHA256:Gx9mT2VkPzLrBq4YnWcJ8UoAeiFhRsDtMvNpXlKwOb0=
+[INFO]  Starting service: httpd        [PID 1058]
+[INFO]  Starting service: monitord     [PID 1073]
+
+[INFO]  Running scheduled integrity check on /var/data/archive/
+[INFO]  File: report_jan.pdf         — SHA256: a3f1bc827d... [PASS]
+[INFO]  File: backup_config.tar.gz   — SHA256: 9e4c21f703... [PASS]
+[INFO]  File: user_snapshot.bin      — SHA256: 0d7a5e3b19... [PASS]
+[WARN]  File: notes_temp.txt         — SHA256 mismatch. Expected: d8f3c1a0b2, Got: 7a4e1d9c2f
+[INFO]  Flagging file for manual review.
+
+[DEBUG] notes_temp.txt raw content preview (first 5 lines):
+  > line 001: x4Gp_random_header_9KmL
+  > line 002: TzQr8NvYb3WjUeHf2AoXcI
+  > line 003: ARTIMAS{hidden_message_extracted}
+  > line 004: 5sVwBnDkP0MiZa7RyCqLtE
+  > line 005: Jl6OgXeHr2UcNmFbTkPwVs
+
+[INFO]  Manual review queued. Job ID: 7741-rev
+[INFO]  Integrity check complete. 3 passed, 1 flagged.
+
+[INFO]  CPU usage (avg 5m): 3.2%
+[INFO]  Memory usage: 2.1 GB / 16 GB
+[INFO]  Disk /dev/sda1: 214 GB used of 500 GB (42%)
+[INFO]  Uptime: 14 days, 7 hours, 22 minutes
+
+[INFO]  Scheduled backup started → /mnt/backup/nightly/2024-02-14.tar.gz
+[INFO]  Compressing: /etc ... done (1.2 MB)
+[INFO]  Compressing: /home ... done (84.7 MB)
+[INFO]  Compressing: /var/log ... done (22.3 MB)
+[INFO]  Backup complete. Total size: 108.2 MB. Duration: 43s
+
+[INFO]  Session checkpoint saved.
+[INFO]  Next scheduled task: 2024-02-14T12:00:00Z
+[INFO]  Log rotation: /var/log/syslog.1 archived. Current log reset.
+------------------------------------------------------------
+END OF LOG EXPORT
