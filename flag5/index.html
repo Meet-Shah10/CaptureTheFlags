@@ -2,152 +2,265 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flag 5 | OSINT Challenge</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGNAL_05 | ARTIMAS CTF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;700&display=swap"
+        rel="stylesheet">
     <style>
-        * {
+        :root {
+            --neon-purple: #bf00ff;
+            --dark-bg: #03010a;
+            --border: rgba(191, 0, 255, 0.3);
+        }
+
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
         body {
+            background: var(--dark-bg);
+            color: #e0f7ff;
+            font-family: 'Exo 2', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #0f172a;
-            font-family: 'Segoe UI', sans-serif;
-            color: #e2e8f0;
-            padding: 30px 16px;
+            overflow: hidden;
+            padding: 30px 20px;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 640px;
         }
 
         .card {
-            background: #1e293b;
-            border: 1px solid #334155;
+            background: rgba(12, 0, 20, 0.92);
+            border: 1px solid var(--border);
             border-radius: 14px;
-            padding: 40px 48px;
+            padding: 40px;
             text-align: center;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-            max-width: 620px;
-            width: 100%;
+            box-shadow: 0 0 50px rgba(191, 0, 255, 0.1);
+            backdrop-filter: blur(12px);
         }
 
-        h1 {
+        .eyebrow {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            color: #4a5568;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .title {
+            font-family: 'Share Tech Mono', monospace;
             font-size: 1.7rem;
-            color: #f1f5f9;
-            margin-bottom: 8px;
+            color: var(--neon-purple);
+            text-shadow: 0 0 12px rgba(191, 0, 255, 0.5);
+            margin-bottom: 10px;
         }
 
         .subtitle {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: #64748b;
-            margin-bottom: 30px;
-            line-height: 1.5;
+            line-height: 1.6;
+            margin-bottom: 28px;
         }
 
-        .image-wrap {
+        .img-wrap {
             border-radius: 10px;
             overflow: hidden;
-            border: 2px solid #334155;
-            margin-bottom: 28px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
             position: relative;
         }
 
-        .image-wrap img {
+        .img-wrap::after {
+            content: '// METADATA DETECTED';
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 2px;
+            color: var(--neon-purple);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .img-wrap img {
             width: 100%;
             display: block;
         }
 
-        .download-btn {
+        .btn {
             display: inline-block;
-            background: #7c3aed;
-            color: #f5f3ff;
+            background: transparent;
+            border: 1px solid rgba(191, 0, 255, 0.5);
+            border-radius: 6px;
+            padding: 12px 32px;
+            color: var(--neon-purple);
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
             text-decoration: none;
-            border-radius: 8px;
-            padding: 11px 30px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            transition: background 0.2s;
             margin-bottom: 28px;
+            transition: all .3s;
+            cursor: pointer;
         }
 
-        .download-btn:hover {
-            background: #6d28d9;
+        .btn:hover {
+            background: rgba(191, 0, 255, 0.08);
+            box-shadow: 0 0 16px rgba(191, 0, 255, 0.2);
         }
 
-        .hint {
-            background: #1a1a2e;
-            border-left: 3px solid #7c3aed;
+        .hint-block {
+            background: rgba(191, 0, 255, 0.04);
+            border-left: 3px solid rgba(191, 0, 255, 0.4);
             border-radius: 6px;
             padding: 14px 18px;
             text-align: left;
-            font-size: 0.85rem;
-            color: #c4b5fd;
-            line-height: 1.7;
         }
 
-        .hint span {
-            display: block;
-            font-size: 0.75rem;
+        .hint-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: rgba(191, 0, 255, .6);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #7c3aed;
-            margin-bottom: 5px;
-            font-weight: 700;
+            display: block;
+            margin-bottom: 8px;
         }
 
-        .tools {
-            margin-top: 20px;
+        .hint-text {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .tags {
             display: flex;
             justify-content: center;
             gap: 10px;
             flex-wrap: wrap;
+            margin-top: 18px;
         }
 
-        .tool-tag {
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 999px;
+        .tag {
+            background: rgba(191, 0, 255, 0.07);
+            border: 1px solid rgba(191, 0, 255, 0.2);
+            border-radius: 20px;
             padding: 5px 14px;
-            font-size: 0.78rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
             color: #94a3b8;
-            font-family: monospace;
         }
     </style>
 </head>
 
 <body>
-    <div class="card">
-        <h1>🌍 Flag 5 — Where In The World?</h1>
-        <p class="subtitle">
-            Someone sent us this mysterious photo. The flag isn't in the image —
-            it's hidden <em>inside</em> it. Look beyond what you can see.
-        </p>
-
-        <div class="image-wrap">
-            <img src="challenge.jpg" alt="Mystery Landmark Photo" />
-        </div>
-
-        <a class="download-btn" href="challenge.jpg" download="challenge.jpg">
-            📥 Download Image
-        </a>
-
-        <div class="hint">
-            <span>💡 Hint</span>
-            Every photo taken with a camera stores invisible information alongside the pixels.
-            Photographers, journalists and OSINT analysts read this hidden data all the time.
-            Try inspecting what's attached to the file itself — not just what you can see.
-        </div>
-
-        <div class="tools">
-            <span class="tool-tag">exiftool</span>
-            <span class="tool-tag">Jeffrey's EXIF Viewer</span>
-            <span class="tool-tag">exif.regex.info</span>
-            <span class="tool-tag">strings</span>
+    <canvas id="bg-canvas"></canvas>
+    <div class="container">
+        <div class="card">
+            <div class="eyebrow">// OSINT &amp; Steganography</div>
+            <div class="title">🌍 Where In The World?</div>
+            <p class="subtitle">An intercepted image was recovered from a compromised device. The flag isn't in the
+                pixels — it's hidden <em>inside</em> the file itself. Look beyond what you can see.</p>
+            <div class="img-wrap">
+                <img src="challenge.jpg" alt="Mystery Landmark Photo"
+                    onerror="this.parentElement.innerHTML='<div style=\'padding:60px 20px;color:#4a5568;font-family:Share Tech Mono,monospace;font-size:.8rem;\'>// challenge.jpg</div>'">
+            </div>
+            <a class="btn" href="challenge.jpg" download="challenge.jpg">📥 Download Image File</a>
+            <div class="hint-block">
+                <span class="hint-label">💡 Analyst Note</span>
+                <span class="hint-text">Every photo taken with a camera stores invisible information alongside the
+                    pixels. Photographers, journalists and OSINT analysts read this hidden data all the time. Try
+                    inspecting what's <em>attached</em> to the file itself — not just what you can see.</span>
+            </div>
+            <div class="tags">
+                <span class="tag">exiftool</span>
+                <span class="tag">Jeffrey's EXIF Viewer</span>
+                <span class="tag">exif.regex.info</span>
+                <span class="tag">strings</span>
+            </div>
         </div>
     </div>
+    <!-- Submit Strip -->
+    <div
+        style="max-width:640px;margin:18px auto 0;background:rgba(8,4,22,0.9);border:1px solid rgba(191,0,255,0.15);border-radius:12px;padding:18px;font-family:'Share Tech Mono',monospace;position:relative;z-index:2;">
+        <span
+            style="font-size:0.68rem;letter-spacing:3px;color:#4a5568;text-transform:uppercase;display:block;margin-bottom:10px;">//
+            Submit Flag 5</span>
+        <div style="display:flex;gap:8px;">
+            <input type="text" id="fi5" placeholder="ARTIMAS{...}" autocomplete="off" spellcheck="false"
+                style="flex:1;background:rgba(191,0,255,0.04);border:1px solid rgba(191,0,255,0.15);border-radius:6px;padding:10px 14px;color:white;font-family:'Share Tech Mono',monospace;font-size:0.82rem;outline:none;">
+            <button onclick="submitFlag5()"
+                style="background:linear-gradient(135deg,#bf00ff,#7c3aed);border:none;border-radius:6px;padding:10px 18px;color:white;font-family:'Exo 2',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Submit</button>
+        </div>
+        <div id="fb5" style="margin-top:8px;font-size:0.75rem;min-height:1.1em;"></div>
+        <a href="../index.html"
+            style="display:inline-block;margin-top:12px;font-size:0.72rem;letter-spacing:2px;color:#4a5568;text-decoration:none;border:1px solid #1e293b;border-radius:6px;padding:6px 16px;">←
+            Return to Hub</a>
+    </div>
+    <script>
+        const canvas = document.getElementById('bg-canvas'), ctx = canvas.getContext('2d');
+
+        let w, h, p = []; function resize() {
+            w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize); resize();
+        for (let i = 0; i < 55; i++)p.push({
+            x: Math.random() * w, y: Math.random() * h, vx: Math.random() * .4 - .2, vy:
+                Math.random() * .4 - .2
+        }); function draw() {
+            ctx.clearRect(0, 0, w, h); p.forEach(q => {
+                q.x += q.vx; q.y +=
+                    q.vy; if (q.x < 0) q.x = w; if (q.x > w) q.x = 0; if (q.y < 0) q.y = h; if (q.y > h) q.y = 0; ctx.beginPath();
+                ctx.arc(q.x, q.y, 1.1, 0, Math.PI * 2); ctx.fillStyle = 'rgba(191,0,255,0.2)'; ctx.fill();
+            });
+            requestAnimationFrame(draw);
+        }
+        draw();
+        // ── Flag Submission ──
+        async function submitFlag5() {
+            const val = document.getElementById('fi5').value.trim();
+            const fb = document.getElementById('fb5');
+            if (!val) { fb.style.color = '#ff3e3e'; fb.textContent = 'Enter the flag first'; return; }
+            fb.style.color = '#00e5ff'; fb.textContent = 'Verifying...';
+            const res = await fetch('/api/scores/flag', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer: val })
+            }).then(r => r.json());
+            if (res.ok) {
+                fb.style.color = '#00ff88'; fb.textContent = '✅ CORRECT! FLAG 5 CAPTURED — Returning...';
+                setTimeout(() => { window.location.href = '/index.html'; }, 1200);
+            } else if (res.alreadySolved) {
+                fb.style.color = '#fbbf24'; fb.textContent = '⚡ Already captured — Returning...';
+                setTimeout(() => { window.location.href = '/index.html'; }, 1200);
+            } else { fb.style.color = '#ff3e3e'; fb.textContent = '⚠ Invalid flag — try again'; }
+        }
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && document.activeElement.id === 'fi5')
+                submitFlag5();
+        });
+    </script>
 </body>
 
 </html>

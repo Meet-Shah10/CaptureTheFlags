@@ -2,131 +2,218 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flag 9 | PDF Forensics</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOC_09 | ARTIMAS CTF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;700&display=swap"
+        rel="stylesheet">
     <style>
-        * {
+        :root {
+            --neon-red: #ff3e3e;
+            --dark-bg: #03010a;
+            --border: rgba(255, 62, 62, 0.3);
+        }
+
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
         body {
+            background: var(--dark-bg);
+            color: #e0f7ff;
+            font-family: 'Exo 2', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #0f172a;
-            font-family: 'Segoe UI', sans-serif;
-            color: #e2e8f0;
-            padding: 30px 16px;
+            overflow: hidden;
+            padding: 30px 20px;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 560px;
         }
 
         .card {
-            background: #1e293b;
-            border: 1px solid #334155;
+            background: rgba(15, 0, 0, 0.92);
+            border: 1px solid var(--border);
             border-radius: 14px;
-            padding: 48px 56px;
+            padding: 44px;
             text-align: center;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-            max-width: 540px;
-            width: 100%;
+            box-shadow: 0 0 50px rgba(255, 62, 62, 0.08);
+            backdrop-filter: blur(12px);
         }
 
-        h1 {
+        .eyebrow {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            color: #4a5568;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .title {
+            font-family: 'Share Tech Mono', monospace;
             font-size: 1.7rem;
-            color: #f1f5f9;
+            color: var(--neon-red);
+            text-shadow: 0 0 10px rgba(255, 62, 62, 0.4);
             margin-bottom: 10px;
         }
 
         .subtitle {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: #64748b;
-            margin-bottom: 34px;
             line-height: 1.6;
-        }
-
-        .download-btn {
-            display: inline-block;
-            background: #dc2626;
-            color: #fef2f2;
-            text-decoration: none;
-            border-radius: 8px;
-            padding: 12px 32px;
-            font-size: 0.95rem;
-            font-weight: 600;
             margin-bottom: 30px;
-            transition: background 0.2s;
         }
 
-        .download-btn:hover {
-            background: #ef4444;
+        .btn {
+            display: inline-block;
+            background: transparent;
+            border: 1px solid rgba(255, 62, 62, 0.4);
+            border-radius: 6px;
+            padding: 13px 34px;
+            color: var(--neon-red);
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            margin-bottom: 28px;
+            transition: all .3s;
         }
 
-        .hint {
-            background: #2d1a1a;
-            border-left: 3px solid #ef4444;
+        .btn:hover {
+            background: rgba(255, 62, 62, 0.07);
+            box-shadow: 0 0 14px rgba(255, 62, 62, 0.18);
+        }
+
+        .hint-block {
+            background: rgba(255, 62, 62, 0.04);
+            border-left: 3px solid rgba(255, 62, 62, 0.35);
             border-radius: 6px;
             padding: 14px 18px;
             text-align: left;
-            font-size: 0.85rem;
-            color: #fca5a5;
-            line-height: 1.7;
         }
 
-        .hint span {
-            display: block;
-            font-size: 0.75rem;
+        .hint-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: rgba(255, 62, 62, .5);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #ef4444;
-            margin-bottom: 5px;
-            font-weight: 700;
+            display: block;
+            margin-bottom: 8px;
         }
 
-        .tools {
-            margin-top: 20px;
+        .hint-text {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .tags {
             display: flex;
             justify-content: center;
             gap: 10px;
             flex-wrap: wrap;
+            margin-top: 18px;
         }
 
-        .tool-tag {
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 999px;
+        .tag {
+            background: rgba(255, 62, 62, 0.07);
+            border: 1px solid rgba(255, 62, 62, 0.2);
+            border-radius: 20px;
             padding: 5px 14px;
-            font-size: 0.78rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
             color: #94a3b8;
-            font-family: monospace;
         }
     </style>
 </head>
 
 <body>
-    <div class="card">
-        <h1>📄 Flag 9 — Beyond the Text</h1>
-        <p class="subtitle">
-            A leaked corporate document was recovered.<br>
-            The flag isn't written on the page, but it's part of the file.
-        </p>
-        <a class="download-btn" href="challenge.pdf" download="challenge.pdf">
-            📥 Download challenge.pdf
-        </a>
-        <div class="hint">
-            <span>💡 Hint</span>
-            Digital files often contain hidden attributes like Author, Creator, or Keywords.
-            These aren't visible in the main content. Try checking the "Properties" of the file.
-        </div>
-        <div class="tools">
-            <span class="tool-tag">Adobe Acrobat</span>
-            <span class="tool-tag">ExifTool</span>
-            <span class="tool-tag">PDF Viewer</span>
-            <span class="tool-tag">strings</span>
+    <canvas id="bg-canvas"></canvas>
+    <div class="container">
+        <div class="card">
+            <div class="eyebrow">// PDF Metadata Forensics</div>
+            <div class="title">📄 Beyond the Text</div>
+            <p class="subtitle">A leaked corporate document was recovered from a compromised server. The flag isn't
+                written on the page — but it's part of the file itself.</p>
+            <a class="btn" href="challenge.pdf" download="challenge.pdf">📥 Download challenge.pdf</a>
+            <div class="hint-block">
+                <span class="hint-label">💡 Analyst Note</span>
+                <span class="hint-text">Digital files often contain hidden attributes like Author, Creator, Subject, or
+                    Keywords. These aren't visible in the main content. Try checking the "Properties" or metadata of the
+                    file — not its visual contents.</span>
+            </div>
+            <div class="tags">
+                <span class="tag">Adobe Acrobat</span>
+                <span class="tag">ExifTool</span>
+                <span class="tag">PDF Viewer</span>
+                <span class="tag">strings</span>
+            </div>
         </div>
     </div>
+    <!-- Submit Strip -->
+    <div
+        style="max-width:560px;margin:18px auto 0;background:rgba(8,4,22,0.9);border:1px solid rgba(255,62,62,0.15);border-radius:12px;padding:18px;font-family:'Share Tech Mono',monospace;position:relative;z-index:2;">
+        <span
+            style="font-size:0.68rem;letter-spacing:3px;color:#4a5568;text-transform:uppercase;display:block;margin-bottom:10px;">//
+            Submit Flag 9</span>
+        <div style="display:flex;gap:8px;">
+            <input type="text" id="fi9" placeholder="ARTIMAS{...}" autocomplete="off" spellcheck="false"
+                style="flex:1;background:rgba(255,62,62,0.04);border:1px solid rgba(255,62,62,0.15);border-radius:6px;padding:10px 14px;color:white;font-family:'Share Tech Mono',monospace;font-size:0.82rem;outline:none;">
+            <button onclick="submitFlag9()"
+                style="background:linear-gradient(135deg,#ff3e3e,#dc2626);border:none;border-radius:6px;padding:10px 18px;color:white;font-family:'Exo 2',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Submit</button>
+        </div>
+        <div id="fb9" style="margin-top:8px;font-size:0.75rem;min-height:1.1em;"></div>
+        <a href="../index.html"
+            style="display:inline-block;margin-top:12px;font-size:0.72rem;letter-spacing:2px;color:#4a5568;text-decoration:none;border:1px solid #1e293b;border-radius:6px;padding:6px 16px;">←
+            Return to Hub</a>
+    </div>
+    <script>
+        const canvas = document.getElementById('bg-canvas'), ctx = canvas.getContext('2d');
+        let w, h, p = []; function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+        for (let i = 0; i < 50; i++)p.push({ x: Math.random() * w, y: Math.random() * h, vx: Math.random() * .4 - .2, vy: Math.random() * .4 - .2 });
+        function draw() { ctx.clearRect(0, 0, w, h); p.forEach(q => { q.x += q.vx; q.y += q.vy; if (q.x < 0) q.x = w; if (q.x > w) q.x = 0; if (q.y < 0) q.y = h; if (q.y > h) q.y = 0; ctx.beginPath(); ctx.arc(q.x, q.y, 1, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,62,62,0.18)'; ctx.fill(); }); requestAnimationFrame(draw); }
+        draw();
+        // ── Flag Submission ──
+        async function submitFlag9() {
+            const val = document.getElementById('fi9').value.trim();
+            const fb = document.getElementById('fb9');
+            if (!val) { fb.style.color = '#ff3e3e'; fb.textContent = 'Enter the flag first'; return; }
+            fb.style.color = '#00e5ff'; fb.textContent = 'Verifying...';
+            const res = await fetch('/api/scores/flag', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer: val })
+            }).then(r => r.json());
+            if (res.ok) {
+                fb.style.color = '#00ff88'; fb.textContent = '✅ CORRECT! FLAG 9 CAPTURED — Returning...';
+                setTimeout(() => { window.location.href = '/index.html'; }, 1200);
+            } else if (res.alreadySolved) {
+                fb.style.color = '#fbbf24'; fb.textContent = '⚡ Already captured — Returning...';
+                setTimeout(() => { window.location.href = '/index.html'; }, 1200);
+            } else { fb.style.color = '#ff3e3e'; fb.textContent = '⚠ Invalid flag — try again'; }
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Enter' && document.activeElement.id === 'fi9') submitFlag9(); });
+    </script>
 </body>
 
 </html>

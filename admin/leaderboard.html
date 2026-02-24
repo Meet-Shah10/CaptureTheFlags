@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARTIMAS CTF — Admin Panel</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --cyan: #00e5ff;
+            --green: #00ff88;
+            --purple: #bf00ff;
+            --amber: #fbbf24;
+            --red: #ff3e3e;
+            --dark: #03010a;
+            --card: rgba(8, 4, 22, 0.97);
+            --border: rgba(0, 229, 255, 0.15);
+            --text: #e0f7ff;
+            --muted: #64748b;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--dark);
+            color: var(--text);
+            font-family: 'Exo 2', sans-serif;
+            min-height: 100vh;
+            visibility: hidden;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(3, 1, 10, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            height: 54px;
+        }
+
+        .topbar-brand {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--purple);
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .tab-btn {
+            padding: 5px 16px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            color: var(--muted);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.66rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text);
+        }
+
+        .tab-btn.active {
+            background: rgba(0, 229, 255, 0.07);
+            border-color: rgba(0, 229, 255, 0.22);
+            color: var(--cyan);
+        }
+
+        .logout-topbar {
+            background: transparent;
+            border: 1px solid rgba(255, 62, 62, 0.25);
+            border-radius: 6px;
+            padding: 5px 14px;
+            color: var(--red);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.64rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* ── Page ── */
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 22px 80px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* ── Stats ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+
+        .stat-val {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.85rem;
+            display: block;
+        }
+
+        .stat-lbl {
+            font-size: 0.62rem;
+            color: var(--muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
+        .c-cyan {
+            color: var(--cyan);
+        }
+
+        .c-green {
+            color: var(--green);
+        }
+
+        .c-purple {
+            color: var(--purple);
+        }
+
+        .c-amber {
+            color: var(--amber);
+        }
+
+        /* ── Sec header ── */
+        .sec-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .sec-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: var(--cyan);
+            text-transform: uppercase;
+        }
+
+        .sec-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* ── Panel ── */
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 22px;
+        }
+
+        .panel-lbl {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.66rem;
+            letter-spacing: 3px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        /* ── Table ── */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card);
+        }
+
+        thead th {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 2px;
+            color: var(--muted);
+            text-transform: uppercase;
+            padding: 12px 13px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover {
+            background: rgba(0, 229, 255, 0.025);
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        td {
+            padding: 12px 13px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.74rem;
+            white-space: nowrap;
+        }
+
+        .name-td {
+            color: var(--text);
+            font-size: 0.84rem;
+            font-weight: 600;
+        }
+
+        .flags-td {
+            color: var(--cyan);
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+
+        .time-td {
+            color: var(--amber);
+        }
+
+        .rank-td {
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--muted);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+        }
+
+        /* ── Badges ── */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.6rem;
+            letter-spacing: 1px;
+        }
+
+        .badge-done {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.25);
+            color: var(--green);
+        }
+
+        .badge-wip {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid rgba(0, 229, 255, 0.25);
+            color: var(--cyan);
+        }
+
+        .badge-none {
+            background: rgba(100, 116, 139, 0.1);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            color: var(--muted);
+        }
+
+        /* ── Buttons ── */
+        .icon-btn {
+            background: transparent;
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: 6px;
+            padding: 6px 13px;
+            color: var(--cyan);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.66rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .icon-btn:hover {
+            background: rgba(0, 229, 255, 0.07);
+        }
+
+        .danger-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 62, 62, 0.3);
+            border-radius: 6px;
+            padding: 6px 13px;
+            color: var(--red);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.66rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .danger-btn:hover {
+            background: rgba(255, 62, 62, 0.07);
+        }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            padding: 4px 7px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.76rem;
+            color: var(--muted);
+            transition: color 0.2s;
+        }
+
+        .action-btn:hover {
+            color: var(--red);
+        }
+
+        .green-btn {
+            background: transparent;
+            border: 1px solid rgba(0, 255, 136, 0.25);
+            border-radius: 6px;
+            padding: 6px 13px;
+            color: var(--green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.66rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .green-btn:hover {
+            background: rgba(0, 255, 136, 0.06);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--cyan), var(--green));
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            color: black;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 700;
+            font-size: 0.78rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        /* ── Row input ── */
+        .row-input {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .field-input {
+            flex: 1;
+            min-width: 0;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(0, 229, 255, 0.16);
+            border-radius: 6px;
+            padding: 9px 13px;
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.76rem;
+            outline: none;
+        }
+
+        .field-input:focus {
+            border-color: var(--cyan);
+        }
+
+        .field-input::placeholder {
+            color: #2d3748;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.72rem;
+            min-height: 1em;
+        }
+
+        .fb-ok {
+            color: var(--green);
+        }
+
+        .fb-err {
+            color: var(--red);
+        }
+
+        /* ── Settings ── */
+        .settings-grid {
+            display: grid;
+            gap: 18px;
+            max-width: 540px;
+        }
+
+        .setting-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px;
+        }
+
+        .setting-title {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--cyan);
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .setting-desc {
+            font-size: 0.76rem;
+            color: var(--muted);
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+
+        .saved-flash {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--green);
+            margin-left: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="topbar">
+        <span class="topbar-brand">🛡 ARTIMAS ADMIN</span>
+        <nav class="tab-nav">
+            <button class="tab-btn active" id="tb-leaderboard" onclick="switchTab('leaderboard', this)">🏆
+                Leaderboard</button>
+            <button class="tab-btn" id="tb-participants" onclick="switchTab('participants', this)">👥
+                Participants</button>
+            <button class="tab-btn" id="tb-settings" onclick="switchTab('settings', this)">⚙ Settings</button>
+        </nav>
+        <button class="logout-topbar" onclick="doLogout()">Logout</button>
+    </div>
+
+    <div class="page">
+
+        <!-- ══ LEADERBOARD ══ -->
+        <div class="tab-panel active" id="tab-leaderboard">
+            <div class="stats-row">
+                <div class="stat-card"><span class="stat-val c-cyan" id="s-total">—</span>
+                    <div class="stat-lbl">Players</div>
+                </div>
+                <div class="stat-card"><span class="stat-val c-green" id="s-top">—</span>
+                    <div class="stat-lbl">Top Score</div>
+                </div>
+                <div class="stat-card"><span class="stat-val c-purple" id="s-full">—</span>
+                    <div class="stat-lbl">Full Clears</div>
+                </div>
+                <div class="stat-card"><span class="stat-val c-amber" id="s-avg">—</span>
+                    <div class="stat-lbl">Avg Flags</div>
+                </div>
+            </div>
+
+            <div class="sec-header">
+                <span class="sec-title">// Live Rankings</span>
+                <div class="sec-actions">
+                    <button class="icon-btn" onclick="loadLeaderboard()">↻ Refresh</button>
+                    <button class="icon-btn" onclick="exportCSV()">⬇ Export CSV</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align:center">Rank</th>
+                            <th>Player</th>
+                            <th>Flags</th>
+                            <th>Total Time</th>
+                            <th>F1</th>
+                            <th>F2</th>
+                            <th>F3</th>
+                            <th>F4</th>
+                            <th>F5</th>
+                            <th>F6</th>
+                            <th>F7</th>
+                            <th>F8</th>
+                            <th>F9</th>
+                            <th>F10</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lb-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ══ PARTICIPANTS ══ -->
+        <div class="tab-panel" id="tab-participants">
+            <div class="stats-row">
+                <div class="stat-card"><span class="stat-val c-cyan" id="p-count">—</span>
+                    <div class="stat-lbl">Registered</div>
+                </div>
+                <div class="stat-card"><span class="stat-val c-green" id="p-started">—</span>
+                    <div class="stat-lbl">Attempted</div>
+                </div>
+                <div class="stat-card"><span class="stat-val c-purple" id="p-complete">—</span>
+                    <div class="stat-lbl">Completed</div>
+                </div>
+            </div>
+
+            <!-- Add participant -->
+            <div class="panel" style="margin-bottom:16px;">
+                <span class="panel-lbl">// Add Participant Account</span>
+                <div class="row-input">
+                    <input class="field-input" type="text" id="add-name" placeholder="Username..." style="flex:2"
+                        autocomplete="off">
+                    <input class="field-input" type="text" id="add-pw" placeholder="Password..." style="flex:2"
+                        autocomplete="off">
+                    <button class="primary-btn" onclick="addParticipant()">+ Add</button>
+                </div>
+                <div class="feedback" id="add-feedback"></div>
+            </div>
+
+            <div class="sec-header">
+                <span class="sec-title">// Participant List</span>
+                <div class="sec-actions">
+                    <button class="icon-btn" onclick="loadParticipants()">↻ Refresh</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Username</th>
+                            <th>Joined At</th>
+                            <th>Progress</th>
+                            <th>Flags</th>
+                            <th>Time</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="parts-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ══ SETTINGS ══ -->
+        <div class="tab-panel" id="tab-settings">
+            <div class="settings-grid">
+                <div class="setting-card">
+                    <div class="setting-title">Change Admin Password</div>
+                    <div class="setting-desc">Update the password for the admin account.</div>
+                    <div class="row-input" style="margin-bottom:8px;">
+                        <input class="field-input" type="password" id="new-pw" placeholder="New password...">
+                        <input class="field-input" type="password" id="confirm-pw" placeholder="Confirm...">
+                    </div>
+                    <button class="primary-btn" onclick="changePassword()" style="margin-right:10px;">Save</button>
+                    <span class="saved-flash" id="pw-flash">✓ Saved</span>
+                    <div class="feedback" id="pw-feedback"></div>
+                </div>
+
+                <div class="setting-card">
+                    <div class="setting-title">Danger Zone</div>
+                    <div class="setting-desc">Delete all participant data and wipe the database. This action cannot be
+                        undone.</div>
+                    <button class="danger-btn" onclick="wipeAll()">⚠ Wipe All CTF Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const FLAG_NAMES = ['View Source', 'Admin Panel', 'Base64', 'Caesar', 'EXIF', 'OSINT', 'Log Forensics', 'ZIP Crack', 'PDF Meta', 'Hidden File'];
+
+        // ── Auth check ──
+        async function authCheck() {
+            const me = await fetch('/api/me').then(r => r.json());
+            if (!me.authenticated || me.role !== 'admin') {
+                window.location.href = '/login.html';
+                return false;
+            }
+            return true;
+        }
+
+        async function doLogout() {
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/login.html';
+        }
+
+        // ── Tabs ──
+        function switchTab(name, btn) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + name).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // ── Time formatting ──
+        function fmtTime(secs) {
+            if (!secs) return '—';
+            const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
+            if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m`;
+            return `${m}m ${String(s).padStart(2, '0')}s`;
+        }
+        function esc(s) {
+            return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+        function rankBadge(i) {
+            if (i === 0) return '<span style="color:#ffd700;text-shadow:0 0 8px rgba(255,215,0,.5);">🥇</span>';
+            if (i === 1) return '<span style="color:#c0c0c0;">🥈</span>';
+            if (i === 2) return '<span style="color:#cd7f32;">🥉</span>';
+            return `<span style="color:var(--muted)">#${i + 1}</span>`;
+        }
+
+        // ── Leaderboard ──
+        let leaderboardData = [];
+        async function loadLeaderboard() {
+            const rows = await fetch('/api/admin/leaderboard').then(r => r.json());
+            leaderboardData = rows;
+            const tbody = document.getElementById('lb-body');
+
+            document.getElementById('s-total').textContent = rows.length;
+            document.getElementById('s-top').textContent = rows.length ? `${rows[0].solvedCount}/10` : '—';
+            document.getElementById('s-full').textContent = rows.filter(r => r.solvedCount === 10).length;
+            document.getElementById('s-avg').textContent = rows.length
+                ? (rows.reduce((s, r) => s + r.solvedCount, 0) / rows.length).toFixed(1) : '—';
+
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="14" class="empty-state">NO SCORES YET — PLAYERS NEED TO SOLVE FLAGS</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = rows.map((r, i) => {
+                const cells = r.flagTimes.map(t =>
+                    t > 0 ? `<td style="color:var(--amber);font-size:.68rem;">${fmtTime(t)}</td>`
+                        : `<td style="color:#2d3748;font-size:.68rem;">—</td>`
+                ).join('');
+                return `<tr>
+                    <td class="rank-td">${rankBadge(i)}</td>
+                    <td class="name-td">${esc(r.username)}</td>
+                    <td class="flags-td">${r.solvedCount}/10</td>
+                    <td class="time-td">${fmtTime(r.totalElapsed)}</td>
+                    ${cells}
+                    <td style="text-align:center">
+                        <button class="icon-btn" style="border-color:var(--red);color:var(--red);padding:4px 8px;font-size:0.6rem" title="Delete account" onclick="adminDeleteParticipant(${r.id},'${esc(r.username)}')">DELETE</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function adminDeleteParticipant(id, name) {
+            if (!confirm(`Are you sure you want to PERMANENTLY delete "${name}" and all their progress?`)) return;
+
+            try {
+                const res = await fetch(`/api/admin/participants/${id}`, { method: 'DELETE' }).then(r => r.json());
+                if (res.ok) {
+                    alert(`Successfully deleted participant: ${name}`);
+                    loadLeaderboard();
+                    if (document.getElementById('tb-participants').classList.contains('active')) loadParticipants();
+                } else {
+                    alert(`Error deleting participant: ${res.error || 'Unknown error'}`);
+                }
+            } catch (err) {
+                alert(`Network error: ${err.message}`);
+            }
+        }
+
+        function exportCSV() {
+            if (!leaderboardData.length) { alert('No data to export.'); return; }
+            const header = ['Rank', 'Player', 'Flags', 'Total Secs', ...FLAG_NAMES.map((n, i) => `F${i + 1} - ${n} (s)`)].join(',');
+            const rows = leaderboardData.map((r, i) => [i + 1, `"${r.username}"`, r.solvedCount, r.totalElapsed, ...r.flagTimes].join(','));
+            const blob = new Blob([[header, ...rows].join('\n')], { type: 'text/csv' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = `artimas_ctf_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+        }
+
+        // ── Participants ──
+        let participantsData = [];
+        async function loadParticipants() {
+            const parts = await fetch('/api/admin/participants').then(r => r.json());
+            participantsData = parts;
+
+            const started = parts.filter(p => p.solvedCount > 0).length;
+            const complete = parts.filter(p => p.solvedCount === 10).length;
+            document.getElementById('p-count').textContent = parts.length;
+            document.getElementById('p-started').textContent = started;
+            document.getElementById('p-complete').textContent = complete;
+
+            const tbody = document.getElementById('parts-body');
+            if (!parts.length) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">NO PARTICIPANTS YET</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = parts.map((p, i) => {
+                let badge;
+                if (p.solvedCount === 10) badge = '<span class="badge badge-done">COMPLETED</span>';
+                else if (p.solvedCount > 0) badge = '<span class="badge badge-wip">IN PROGRESS</span>';
+                else badge = '<span class="badge badge-none">NOT STARTED</span>';
+
+                const joinedStr = new Date(p.created_at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' });
+
+                return `<tr>
+                    <td style="color:var(--muted)">${i + 1}</td>
+                    <td class="name-td">${esc(p.username)}</td>
+                    <td style="color:var(--muted);font-size:.68rem;">${joinedStr}</td>
+                    <td>${badge}</td>
+                    <td class="flags-td">${p.solvedCount}/10</td>
+                    <td class="time-td">${fmtTime(p.totalElapsed)}</td>
+                    <td style="display:flex;gap:4px;">
+                        <button class="action-btn" title="Reset progress" onclick="resetParticipant(${p.id},'${esc(p.username)}')">↺</button>
+                        <button class="icon-btn" style="border-color:var(--red);color:var(--red);padding:4px 8px;font-size:0.6rem" title="Delete account" onclick="adminDeleteParticipant(${p.id},'${esc(p.username)}')">DELETE</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function addParticipant() {
+            const name = document.getElementById('add-name').value.trim();
+            const pw = document.getElementById('add-pw').value.trim();
+            const fb = document.getElementById('add-feedback');
+            if (!name || !pw) { fb.className = 'feedback fb-err'; fb.textContent = 'Username and password required.'; return; }
+
+            const res = await fetch('/api/admin/participants', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: name, password: pw })
+            }).then(r => r.json());
+
+            if (res.ok) {
+                fb.className = 'feedback fb-ok'; fb.textContent = `✓ "${name}" added.`;
+                document.getElementById('add-name').value = '';
+                document.getElementById('add-pw').value = '';
+                loadParticipants();
+            } else {
+                fb.className = 'feedback fb-err'; fb.textContent = '⚠ ' + res.error;
+            }
+        }
+
+        async function resetParticipant(id, name) {
+            if (!confirm(`Reset all progress for "${name}"?`)) return;
+            await fetch(`/api/admin/participants/${id}/reset`, { method: 'POST' });
+            loadParticipants(); loadLeaderboard();
+        }
+
+        // ── Settings ──
+        async function changePassword() {
+            const nw = document.getElementById('new-pw').value;
+            const cf = document.getElementById('confirm-pw').value;
+            const fb = document.getElementById('pw-feedback');
+            if (!nw) { fb.className = 'feedback fb-err'; fb.textContent = 'Enter a new password.'; return; }
+            if (nw !== cf) { fb.className = 'feedback fb-err'; fb.textContent = 'Passwords do not match.'; return; }
+            if (nw.length < 4) { fb.className = 'feedback fb-err'; fb.textContent = 'Password too short.'; return; }
+
+            const res = await fetch('/api/admin/change-password', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ newPassword: nw })
+            }).then(r => r.json());
+
+            if (res.ok) {
+                document.getElementById('new-pw').value = '';
+                document.getElementById('confirm-pw').value = '';
+                fb.className = 'feedback'; fb.textContent = '';
+                const fl = document.getElementById('pw-flash');
+                fl.style.opacity = '1';
+                setTimeout(() => { fl.style.opacity = '0'; }, 2500);
+            } else {
+                fb.className = 'feedback fb-err'; fb.textContent = '⚠ ' + res.error;
+            }
+        }
+
+        async function wipeAll() {
+            if (!confirm('⚠ THIS WILL DELETE ALL PARTICIPANTS AND PROGRESS. Cannot be undone. Proceed?')) return;
+            await fetch('/api/admin/wipe', { method: 'POST' });
+            loadLeaderboard(); loadParticipants();
+            alert('All CTF data wiped.');
+        }
+
+        // ── Particle BG ──
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let w, h, particles = [];
+        function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+        for (let i = 0; i < 50; i++) particles.push({ x: Math.random() * w, y: Math.random() * h, vx: Math.random() * .25 - .125, vy: Math.random() * .25 - .125, c: Math.random() > .6 ? '191,0,255' : '0,229,255' });
+        function draw() {
+            ctx.clearRect(0, 0, w, h);
+            particles.forEach(p => { p.x += p.vx; p.y += p.vy; if (p.x < 0) p.x = w; if (p.x > w) p.x = 0; if (p.y < 0) p.y = h; if (p.y > h) p.y = 0; ctx.beginPath(); ctx.arc(p.x, p.y, 1, 0, Math.PI * 2); ctx.fillStyle = `rgba(${p.c},.16)`; ctx.fill(); });
+            requestAnimationFrame(draw);
+        }
+        draw();
+
+        // ── Auto-refresh ──
+        let refreshTimer;
+        function startAutoRefresh() {
+            loadLeaderboard(); loadParticipants();
+            refreshTimer = setInterval(() => { loadLeaderboard(); loadParticipants(); }, 15000);
+        }
+
+        // ── Init ──
+        authCheck().then(ok => {
+            if (!ok) return;
+            document.body.style.visibility = 'visible';
+            startAutoRefresh();
+        });
+    </script>
+</body>
+
+</html>

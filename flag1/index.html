@@ -2,53 +2,226 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CTF Challenge</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURE-GATE-01 | ARTIMAS CTF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;700&display=swap"
+        rel="stylesheet">
     <style>
+        :root {
+            --neon-cyan: #00e5ff;
+            --neon-green: #00ff88;
+            --dark-bg: #03010a;
+            --card-bg: rgba(10, 5, 30, 0.9);
+            --border: rgba(0, 229, 255, 0.3);
+        }
+
         body {
+            background-color: var(--dark-bg);
+            color: #e0f7ff;
+            font-family: 'Exo 2', sans-serif;
             margin: 0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #0f172a;
-            font-family: 'Segoe UI', sans-serif;
-            color: #e2e8f0;
+            overflow: hidden;
         }
 
-        .card {
-            background: #1e293b;
-            border: 1px solid #334155;
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 48px 60px;
+            padding: 40px;
             text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.1);
+            backdrop-filter: blur(10px);
         }
 
-        h1 {
-            font-size: 2rem;
-            margin: 0 0 12px;
-            color: #f1f5f9;
+        .header {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--neon-cyan);
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
         }
 
-        p {
-            font-size: 1rem;
-            color: #94a3b8;
-            margin: 0;
+        .status {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            color: #6b8fa8;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--neon-cyan);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        input {
+            width: 100%;
+            background: rgba(0, 229, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 12px;
+            color: white;
+            font-family: 'Share Tech Mono', monospace;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--neon-cyan), #bf00ff);
+            border: none;
+            border-radius: 4px;
+            color: black;
+            font-weight: 700;
+            font-family: 'Exo 2', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 229, 255, 0.4);
+        }
+
+        #feedback {
+            margin-top: 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            min-height: 1.2em;
+        }
+
+        .error {
+            color: #ff3e3e;
+        }
+
+        .success {
+            color: var(--neon-green);
+        }
+
+        .hint {
+            margin-top: 30px;
+            font-size: 0.75rem;
+            color: #4a5568;
+            font-style: italic;
         }
     </style>
 </head>
 
 <body>
+    <canvas id="bg-canvas"></canvas>
 
-    <!-- FLAG: ARTIMAS{view_source_reveals_secret} -->
+    <div class="container">
+        <div class="auth-card">
+            <div class="header">System Auth</div>
+            <div class="status">GATEWAY: LOGON_REQUIRED</div>
 
-    <div class="card">
-        <h1>🎉 Welcome to the Event</h1>
-        <p>Good luck, and may the best hacker win!</p>
+            <div class="input-group">
+                <label>ACCESS_KEY</label>
+                <input type="text" id="key-input" placeholder="ENTER ENCRYPTION KEY..." autocomplete="off">
+            </div>
+
+            <button class="btn" onclick="validate()">Initialize Link</button>
+            <div id="feedback"></div>
+
+            <div class="hint">"The security logic reveals the key to the castle..."</div>
+        </div>
     </div>
 
+    <script>
+        // REDESIGN NOTES:
+        // Flag is no longer in HTML comments.
+        // It's obfuscated in the validation logic below.
+
+        async function validate() {
+            const input = document.getElementById('key-input').value.trim();
+            const feedback = document.getElementById('feedback');
+            if (!input) { feedback.className = 'error'; feedback.innerText = 'ENTER A VALUE FIRST'; return; }
+
+            feedback.style.color = '#00e5ff';
+            feedback.innerText = 'Verifying...';
+
+            const res = await fetch('/api/scores/flag', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer: input })
+            }).then(r => r.json());
+
+            if (res.ok) {
+                feedback.style.color = '#00ff88';
+                feedback.innerText = '✅ CORRECT! Returning to hub...';
+                setTimeout(() => { window.location.href = '/index.html'; }, 1200);
+            } else if (res.alreadySolved) {
+                feedback.style.color = '#fbbf24';
+                feedback.innerText = '⚡ FLAG ALREADY CAPTURED — Returning to hub...';
+                setTimeout(() => { window.location.href = '/index.html'; }, 1200);
+            } else {
+                feedback.className = 'error';
+                feedback.innerText = 'INVALID CREDENTIALS';
+            }
+        }
+
+        /* Particle Background implementation */
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let w, h, particles = [];
+        function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+        for (let i = 0; i < 50; i++) particles.push({ x: Math.random() * w, y: Math.random() * h, vx: Math.random() * 0.4 - 0.2, vy: Math.random() * 0.4 - 0.2 });
+        function animate() {
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = 'rgba(0, 229, 255, 0.3)';
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0) p.x = w; if (p.x > w) p.x = 0; if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 1, 0, Math.PI * 2); ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Nothing in this world is wrought by a solitary will.
+        // Even the loneliest soul drags behind it a procession of unseen hands—
+        // PACKET_1: "QVJUSU1BU3t2aWV3"
+        // PACKET_2: "X3NvdXJjZV9yZXZl"
+        // PACKET_3: "YWxzX3NlY3JldH0="
+    </script>
 </body>
 
 </html>

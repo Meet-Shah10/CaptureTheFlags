@@ -2,72 +2,113 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flag 6 | OSINT Username Challenge</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GHOST_06 | ARTIMAS CTF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;700&display=swap"
+        rel="stylesheet">
     <style>
-        * {
+        :root {
+            --neon-green: #00ff88;
+            --dark-bg: #03010a;
+            --border: rgba(0, 255, 136, 0.3);
+        }
+
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
         body {
+            background: var(--dark-bg);
+            color: #e0f7ff;
+            font-family: 'Exo 2', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #0f172a;
-            font-family: 'Segoe UI', sans-serif;
-            color: #e2e8f0;
-            padding: 30px 16px;
+            overflow: hidden;
+            padding: 30px 20px;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 580px;
         }
 
         .card {
-            background: #1e293b;
-            border: 1px solid #334155;
+            background: rgba(0, 10, 5, 0.92);
+            border: 1px solid var(--border);
             border-radius: 14px;
-            padding: 48px 56px;
+            padding: 44px;
             text-align: center;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-            max-width: 560px;
-            width: 100%;
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.08);
+            backdrop-filter: blur(12px);
         }
 
-        h1 {
+        .eyebrow {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            color: #4a5568;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .title {
+            font-family: 'Share Tech Mono', monospace;
             font-size: 1.7rem;
-            color: #f1f5f9;
+            color: var(--neon-green);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
             margin-bottom: 10px;
         }
 
         .subtitle {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: #64748b;
-            margin-bottom: 36px;
             line-height: 1.6;
+            margin-bottom: 30px;
         }
 
-        .label {
-            font-size: 0.74rem;
-            letter-spacing: 0.12em;
+        .target-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            color: var(--neon-green);
             text-transform: uppercase;
-            color: #475569;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .username-box {
-            background: #0f172a;
-            border: 1px solid #334155;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid rgba(0, 255, 136, 0.25);
             border-radius: 10px;
-            padding: 18px 24px;
-            font-family: 'Courier New', monospace;
-            font-size: 1.3rem;
+            padding: 20px 24px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.35rem;
             font-weight: 700;
-            color: #34d399;
-            letter-spacing: 0.06em;
+            color: var(--neon-green);
+            letter-spacing: .06em;
             cursor: text;
             user-select: all;
-            margin-bottom: 28px;
+            margin-bottom: 26px;
+            transition: border-color .3s;
+        }
+
+        .username-box:hover {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.12);
         }
 
         .platforms {
@@ -75,73 +116,172 @@
             justify-content: center;
             gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 28px;
+            margin-bottom: 26px;
         }
 
-        .platform-tag {
-            background: #0f172a;
-            border: 1px solid #334155;
+        .platform {
+            background: rgba(0, 255, 136, 0.06);
+            border: 1px solid rgba(0, 255, 136, 0.15);
             border-radius: 8px;
-            padding: 7px 16px;
+            padding: 8px 18px;
             font-size: 0.82rem;
             color: #94a3b8;
-            transition: border-color 0.2s, color 0.2s;
+            transition: all .3s;
+            cursor: default;
         }
 
-        .platform-tag:hover {
-            border-color: #34d399;
-            color: #34d399;
+        .platform:hover {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
         }
 
-        .hint {
-            background: #0d2818;
-            border-left: 3px solid #34d399;
+        .hint-block {
+            background: rgba(0, 255, 136, 0.03);
+            border-left: 3px solid rgba(0, 255, 136, 0.35);
             border-radius: 6px;
             padding: 14px 18px;
             text-align: left;
-            font-size: 0.85rem;
-            color: #6ee7b7;
-            line-height: 1.7;
         }
 
-        .hint span {
-            display: block;
-            font-size: 0.75rem;
+        .hint-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: rgba(0, 255, 136, .5);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #34d399;
-            margin-bottom: 5px;
-            font-weight: 700;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .hint-text {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        code {
+            color: #e0f7ff;
+            font-family: 'Share Tech Mono', monospace;
         }
     </style>
 </head>
 
 <body>
-    <div class="card">
-        <h1>🕵️ Flag 6 — Trace the User</h1>
-        <p class="subtitle">
-            We know someone goes by this username online.<br>
-            They left something public — you just have to find it.
-        </p>
+    <canvas id="bg-canvas"></canvas>
+    <div class="container">
+        <div class="card">
+            <div class="eyebrow">// OSINT — Digital Footprint</div>
+            <div class="title">🕵️ Trace the Ghost</div>
+            <p class="subtitle">We know someone goes by this username online. They left something public — you just have
+                to find the right platform.</p>
 
-        <p class="label">Target Username</p>
-        <div class="username-box">artimas_ctf_player</div>
+            <div class="target-label">// Target Username</div>
+            <div class="username-box">artimas_ctf_player</div>
 
-        <div class="platforms">
-            <span class="platform-tag">GitHub</span>
-            <span class="platform-tag">Pastebin</span>
-            <span class="platform-tag">Gist</span>
-            <span class="platform-tag">Twitter / X</span>
-            <span class="platform-tag">Reddit</span>
-        </div>
+            <div class="platforms">
+                <span class="platform">GitHub</span>
+                <span class="platform">Pastebin</span>
+                <span class="platform">Gist</span>
+                <span class="platform">Twitter / X</span>
+                <span class="platform">Reddit</span>
+            </div>
 
-        <div class="hint">
-            <span>💡 Hint</span>
-            OSINT investigators always check where a username appears across platforms.
-            This person published something publicly on a code-sharing platform.
-            The flag format is <code style="color:#f1f5f9">ARTIMAS{...}</code>.
+            <div class="hint-block">
+                <span class="hint-label">💡 Analyst Note</span>
+                <span class="hint-text">OSINT investigators always check where a username appears across platforms. This
+                    person published something publicly. Try searching their username in the internal database
+                    below.</span>
+            </div>
+
+            <!-- Simulated Search for Offline Play -->
+            <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:20px;">
+                <div class="target-label">// Simulated Terminal Search</div>
+                <div style="display:flex;gap:8px;margin-bottom:12px;">
+                    <input type="text" id="osint-search" placeholder="Enter username to search..."
+                        style="flex:1;background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.15);border-radius:6px;padding:10px 14px;color:white;font-family:'Share Tech Mono',monospace;font-size:0.82rem;outline:none;">
+                    <button onclick="doOsintSearch()"
+                        style="background:rgba(0,255,136,0.1);border:1px solid var(--neon-green);border-radius:6px;padding:10px 18px;color:var(--neon-green);font-family:'Exo 2',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Search</button>
+                </div>
+                <div id="osint-results"
+                    style="text-align:left;font-family:'Share Tech Mono',monospace;font-size:0.75rem;min-height:1.1em;">
+                </div>
+            </div>
         </div>
     </div>
+    <!-- Submit Strip -->
+    <div
+        style="max-width:580px;margin:18px auto 0;background:rgba(8,4,22,0.9);border:1px solid rgba(0,255,136,0.15);border-radius:12px;padding:18px;font-family:'Share Tech Mono',monospace;position:relative;z-index:2;">
+        <span
+            style="font-size:0.68rem;letter-spacing:3px;color:#4a5568;text-transform:uppercase;display:block;margin-bottom:10px;">//
+            Submit Flag 6</span>
+        <div style="display:flex;gap:8px;">
+            <input type="text" id="fi6" placeholder="ARTIMAS{...}" autocomplete="off" spellcheck="false"
+                style="flex:1;background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.15);border-radius:6px;padding:10px 14px;color:white;font-family:'Share Tech Mono',monospace;font-size:0.82rem;outline:none;">
+            <button onclick="submitFlag6()"
+                style="background:linear-gradient(135deg,#00ff88,#00e5ff);border:none;border-radius:6px;padding:10px 18px;color:black;font-family:'Exo 2',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Submit</button>
+        </div>
+        <div id="fb6" style="margin-top:8px;font-size:0.75rem;min-height:1.1em;"></div>
+        <a href="../index.html"
+            style="display:inline-block;margin-top:12px;font-size:0.72rem;letter-spacing:2px;color:#4a5568;text-decoration:none;border:1px solid #1e293b;border-radius:6px;padding:6px 16px;">←
+            Return to Hub</a>
+    </div>
+    <script>
+        const canvas = document.getElementById('bg-canvas'), ctx = canvas.getContext('2d');
+
+        let w, h, p = []; function resize() {
+            w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize); resize();
+        for (let i = 0; i < 50; i++)p.push({
+            x: Math.random() * w, y: Math.random() * h, vx: Math.random() * .35 - .175, vy:
+                Math.random() * .35 - .175
+        }); function draw() {
+            ctx.clearRect(0, 0, w, h); p.forEach(q => {
+                q.x += q.vx; q.y +=
+                    q.vy; if (q.x < 0) q.x = w; if (q.x > w) q.x = 0; if (q.y < 0) q.y = h; if (q.y > h) q.y = 0; ctx.beginPath();
+                ctx.arc(q.x, q.y, 1, 0, Math.PI * 2); ctx.fillStyle = 'rgba(0,255,136,0.18)'; ctx.fill();
+            });
+            requestAnimationFrame(draw);
+        }
+        draw();
+        // ── Flag Submission ──
+        async function submitFlag6() {
+            const val = document.getElementById('fi6').value.trim();
+            const fb = document.getElementById('fb6');
+            if (!val) { fb.style.color = '#ff3e3e'; fb.textContent = 'Enter the flag first'; return; }
+            fb.style.color = '#00e5ff'; fb.textContent = 'Verifying...';
+            const res = await fetch('/api/scores/flag', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer: val })
+            }).then(r => r.json());
+            if (res.ok) {
+                fb.style.color = '#00ff88'; fb.textContent = '✅ CORRECT! FLAG 6 CAPTURED — Returning...';
+                setTimeout(() => { window.location.href = '/index.html'; }, 1200);
+            } else if (res.alreadySolved) {
+                fb.style.color = '#fbbf24'; fb.textContent = '⚡ Already captured — Returning...';
+                setTimeout(() => { window.location.href = '/index.html'; }, 1200);
+            } else { fb.style.color = '#ff3e3e'; fb.textContent = '⚠ Invalid flag — try again'; }
+        }
+        function doOsintSearch() {
+            const q = document.getElementById('osint-search').value.trim().toLowerCase();
+            const res = document.getElementById('osint-results');
+            if (!q) { res.style.color = '#ff3e3e'; res.textContent = 'Enter a username...'; return; }
+            res.style.color = '#00ff88'; res.textContent = 'Searching global databases...';
+            setTimeout(() => {
+                if (q === 'artimas_ctf_player') {
+                    res.innerHTML = `[SUCCESS] 1 MATCH FOUND:<br><a href="mock_profile.html" style="color:var(--neon-green);text-decoration:underline;">Public Profile: artimas_ctf_player (Gist/Pastebin Index)</a>`;
+                } else {
+                    res.style.color = '#ff3e3e'; res.textContent = '[ERROR] 0 matches found for that username.';
+                }
+            }, 800);
+        }
+        document.getElementById('osint-search').addEventListener('keydown', e => { if (e.key === 'Enter') doOsintSearch(); });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && document.activeElement.id === 'fi6')
+                submitFlag6();
+        });
+    </script>
 </body>
 
 </html>

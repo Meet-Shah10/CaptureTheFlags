@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARTIMAS CTF — Mission Control</title>
+    <meta name="description" content="ARTIMAS CTF Challenge Hub — 5 modules, 10 challenges. Hack the future.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --cyan: #00e5ff;
+            --green: #00ff88;
+            --purple: #bf00ff;
+            --orange: #ff6b35;
+            --amber: #fbbf24;
+            --red: #ff3e3e;
+            --dark: #03010a;
+            --card: rgba(8, 4, 22, 0.92);
+            --border: rgba(0, 229, 255, 0.18);
+            --text: #e0f7ff;
+            --muted: #64748b;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--dark);
+            color: var(--text);
+            font-family: 'Exo 2', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Canvas bg ── */
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ── Layout ── */
+        .page {
+            position: relative;
+            z-index: 2;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        /* ── Header ── */
+        .site-header {
+            text-align: center;
+            margin-bottom: 56px;
+            padding-top: 20px;
+        }
+
+        .site-header .eyebrow {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 6px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+
+        .site-header h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--cyan), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .site-header .sub {
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .progress-bar-wrap {
+            max-width: 500px;
+            margin: 28px auto 0;
+            background: rgba(0, 229, 255, 0.07);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            border-radius: 50px;
+            padding: 4px;
+        }
+
+        .progress-bar-inner {
+            height: 10px;
+            border-radius: 50px;
+            background: linear-gradient(90deg, var(--cyan), var(--green));
+            transition: width 0.6s cubic-bezier(.4, 0, .2, 1);
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+        }
+
+        .progress-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--cyan);
+            margin-top: 10px;
+            letter-spacing: 2px;
+        }
+
+        /* ── Alert Banner ── */
+        #alert-banner {
+            display: none;
+            background: rgba(255, 62, 62, 0.1);
+            border: 1px solid rgba(255, 62, 62, 0.3);
+            border-radius: 8px;
+            padding: 14px 20px;
+            margin-bottom: 30px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.82rem;
+            color: #ff3e3e;
+            text-align: center;
+        }
+
+        #success-banner {
+            display: none;
+            background: rgba(0, 255, 136, 0.08);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 8px;
+            padding: 14px 20px;
+            margin-bottom: 30px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.82rem;
+            color: var(--green);
+            text-align: center;
+        }
+
+        /* ── Module Grid ── */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        /* ── Module Card ── */
+        .module-card {
+            background: var(--card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+        }
+
+        .module-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .module-card.locked {
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
+        .module-card.completed {
+            border-color: rgba(0, 255, 136, 0.35);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.08);
+        }
+
+        .module-accent {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .module-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .module-icon {
+            font-size: 2rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .module-meta {
+            flex: 1;
+        }
+
+        .module-num {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 4px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .module-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .module-status-badge {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            flex-shrink: 0;
+        }
+
+        .badge-locked {
+            background: rgba(255, 62, 62, 0.1);
+            border: 1px solid rgba(255, 62, 62, 0.25);
+            color: #ff3e3e;
+        }
+
+        .badge-active {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            color: var(--cyan);
+        }
+
+        .badge-done {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: var(--green);
+        }
+
+        /* ── Flags List ── */
+        .flags-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .flag-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 10px 14px;
+            transition: border-color 0.2s;
+        }
+
+        .flag-row.solved {
+            border-color: rgba(0, 255, 136, 0.25);
+        }
+
+        .flag-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid var(--muted);
+            flex-shrink: 0;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .flag-dot.done {
+            background: var(--green);
+            border-color: var(--green);
+            box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+        }
+
+        .flag-info {
+            flex: 1;
+        }
+
+        .flag-name {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.78rem;
+            color: #94a3b8;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .flag-row.solved .flag-name {
+            color: var(--green);
+        }
+
+        .flag-tech {
+            font-size: 0.72rem;
+            color: #4a5568;
+        }
+
+        .flag-link {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--cyan);
+            text-decoration: none;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .flag-link:hover {
+            color: white;
+        }
+
+        .flag-checkmark {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* ── Submission Form ── */
+        .submit-section {}
+
+        .submit-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 3px;
+            color: var(--muted);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .submit-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .flag-input {
+            flex: 1;
+            background: rgba(0, 229, 255, 0.04);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            border-radius: 6px;
+            padding: 10px 14px;
+            color: white;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.82rem;
+            outline: none;
+            transition: border-color 0.3s;
+            min-width: 0;
+        }
+
+        .flag-input:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 8px rgba(0, 229, 255, 0.15);
+        }
+
+        .flag-input::placeholder {
+            color: #2d3748;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--cyan), var(--green));
+            border: none;
+            border-radius: 6px;
+            padding: 10px 18px;
+            color: black;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .submit-feedback {
+            margin-top: 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            min-height: 1.1em;
+        }
+
+        .fb-error {
+            color: #ff3e3e;
+        }
+
+        .fb-success {
+            color: var(--green);
+        }
+
+        /* Lock overlay icon */
+        .lock-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 8px;
+            background: rgba(3, 1, 10, 0.5);
+            border-radius: 16px;
+            backdrop-filter: blur(2px);
+            z-index: 10;
+        }
+
+        .lock-overlay .lock-icon {
+            font-size: 2.5rem;
+            filter: drop-shadow(0 0 10px rgba(255, 62, 62, 0.4));
+        }
+
+        .lock-overlay .lock-msg {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.72rem;
+            letter-spacing: 2px;
+            color: #ff3e3e;
+            text-align: center;
+        }
+
+        /* ── Completion screen ── */
+        #completion-screen {
+            display: none;
+            text-align: center;
+            margin-top: 60px;
+            padding: 60px 40px;
+            background: var(--card);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 20px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 0 80px rgba(0, 255, 136, 0.1);
+        }
+
+        #completion-screen h2 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        #completion-screen p {
+            color: var(--muted);
+            font-size: 1rem;
+        }
+
+        .reset-btn {
+            margin-top: 30px;
+            background: transparent;
+            border: 1px solid rgba(255, 62, 62, 0.4);
+            border-radius: 6px;
+            padding: 10px 24px;
+            color: #ff3e3e;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.78rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 62, 62, 0.08);
+        }
+
+        /* ── Export Button ── */
+        .export-btn {
+            margin-top: 18px;
+            background: transparent;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: 6px;
+            padding: 8px 22px;
+            color: var(--cyan);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.72rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        .export-btn:hover {
+            background: rgba(0, 229, 255, 0.07);
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.15);
+        }
+
+        /* ── Export Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-box {
+            background: rgba(8, 4, 22, 0.98);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: 14px;
+            padding: 36px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 0 40px rgba(0, 229, 255, 0.12);
+            backdrop-filter: blur(12px);
+            position: relative;
+        }
+
+        .modal-title {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .modal-input {
+            width: 100%;
+            background: rgba(0, 229, 255, 0.04);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: 6px;
+            padding: 10px 14px;
+            color: white;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            outline: none;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        .modal-input:focus {
+            border-color: var(--cyan);
+        }
+
+        .modal-token-area {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 136, 0.25);
+            border-radius: 6px;
+            padding: 12px;
+            color: var(--green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            word-break: break-all;
+            min-height: 70px;
+            resize: none;
+            outline: none;
+            box-sizing: border-box;
+            display: none;
+            margin-top: 12px;
+        }
+
+        .modal-gen-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--cyan), var(--green));
+            border: none;
+            border-radius: 6px;
+            color: black;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 700;
+            font-size: 0.82rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .modal-copy-btn {
+            margin-top: 8px;
+            width: 100%;
+            padding: 9px;
+            background: transparent;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 6px;
+            color: var(--green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .modal-note {
+            margin-top: 14px;
+            font-size: 0.7rem;
+            color: var(--muted);
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            .module-header {
+                flex-wrap: wrap;
+            }
+
+            .submit-row {
+                flex-direction: column;
+            }
+
+            .submit-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body style="visibility:hidden">
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Export Score Modal -->
+    <div class="modal-overlay" id="export-modal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeExportModal()">✕</button>
+            <div class="modal-title">// Export Score</div>
+            <input class="modal-input" type="text" id="player-name-input" placeholder="Enter your name / team name..."
+                autocomplete="off">
+            <button class="modal-gen-btn" onclick="generateToken()">Generate Score Token</button>
+            <textarea class="modal-token-area" id="token-output" readonly></textarea>
+            <button class="modal-copy-btn" id="copy-btn" onclick="copyToken()">📋 Copy Token</button>
+            <p class="modal-note">Give this token to the organizer to register your score on the leaderboard.</p>
+        </div>
+    </div>
+
+    <div class="page">
+        <!-- Header -->
+        <header class="site-header">
+            <div class="eyebrow">// ARTIMAS Capture The Flag</div>
+            <h1>Mission Control</h1>
+            <p class="sub">5 Modules · 10 Challenges · One Objective: <strong style="color:var(--cyan)">Hack The
+                    Future</strong></p>
+            <div class="progress-bar-wrap">
+                <div class="progress-bar-inner" id="global-progress" style="width:0%"></div>
+            </div>
+            <div class="progress-label" id="progress-label">0 / 10 FLAGS CAPTURED</div>
+            <div style="display:flex;gap:10px;margin-top:16px;justify-content:center;flex-wrap:wrap;">
+                <button class="export-btn" onclick="openExportModal()">📤 Export My Score</button>
+                <button class="export-btn" style="border-color:rgba(255,62,62,0.3);color:#ff6b6b;"
+                    onclick="doLogout()">Sign Out</button>
+            </div>
+        </header>
+
+        <!-- Alert banners -->
+        <div id="alert-banner"></div>
+        <div id="success-banner"></div>
+
+        <!-- Module Grid -->
+        <div class="modules-grid" id="modules-grid"></div>
+
+        <!-- Completion -->
+        <div id="completion-screen">
+            <div style="font-size:3rem;margin-bottom:16px">🏆</div>
+            <h2>ALL FLAGS CAPTURED</h2>
+            <p>You've completed all 5 modules and proved your skills. Outstanding work, hacker.</p>
+        </div>
+    </div>
+
+    <script>
+        // ─────────────────────────────────────────────────────────────────
+        // SERVER AUTH GATE + INIT
+        // ─────────────────────────────────────────────────────────────────
+        let currentUser = null;        // logged-in participant info
+        let currentProgress = {};     // flag progress from server
+
+        async function init() {
+            try {
+                const me = await fetch('/api/me').then(r => r.json());
+                if (!me.authenticated || me.role !== 'participant') {
+                    window.location.href = '/login.html';
+                    return;
+                }
+                currentUser = me;
+                currentProgress = await fetch('/api/scores/me').then(r => r.json());
+            } catch (e) {
+                window.location.href = '/login.html';
+                return;
+            }
+            document.body.style.visibility = 'visible';
+            render();
+        }
+
+        async function doLogout() {
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/login.html';
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // MODULE DEFINITIONS
+        // ─────────────────────────────────────────────────────────────────
+        // Flag answers are stored as SHA-256 hashes — never as plain text.
+        const MODULES = [
+            {
+                id: 1,
+                title: 'Recon Basics',
+                icon: '🔍',
+                color: '#00e5ff',
+                flags: [
+                    {
+                        id: 'flag1',
+                        name: 'Flag 1 — View Source',
+                        tech: 'HTML comment recon',
+                        link: 'flag1/index.html',
+                        hash: 'c348ba1068383d2be40c20770a2cb4b510b798dfab5e10e1e4144abd7fb0bc46'
+                    },
+                    {
+                        id: 'flag2',
+                        name: 'Flag 2 — Admin Panel',
+                        tech: 'robots.txt discovery',
+                        link: 'flag2/index.html',
+                        hash: '06e57962de54f747bdce09d82870abcf5b4cb1c32aa4d4a9cf0f78aac0dce099'
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: 'Encoding & Crypto',
+                icon: '🔐',
+                color: '#facc15',
+                flags: [
+                    {
+                        id: 'flag3',
+                        name: 'Flag 3 — Base64',
+                        tech: 'Base64 decoding',
+                        link: 'flag3/flag3.html',
+                        hash: '7210beeb667e1e2cc09b80af4f59fa836bb1fb33ced964fbe8c776390201be00'
+                    },
+                    {
+                        id: 'flag4',
+                        name: 'Flag 4 — Caesar Cipher',
+                        tech: 'ROT-3 cipher (shift 3)',
+                        link: 'flag4/flag4.html',
+                        hash: '9e8767f633b0daef6ab3361374a4398da69f803db5154b2666cafcde87779777'
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: 'OSINT & EXIF',
+                icon: '🌍',
+                color: '#bf00ff',
+                flags: [
+                    {
+                        id: 'flag5',
+                        name: 'Flag 5 — EXIF Metadata',
+                        tech: 'Image EXIF analysis',
+                        link: 'flag5/index.html',
+                        hash: 'a81df38809bb0203946ea56619b1dd06995c0e25abdf760eaaeeb4792855c773'
+                    },
+                    {
+                        id: 'flag6',
+                        name: 'Flag 6 — OSINT Profile',
+                        tech: 'Username OSINT search',
+                        link: 'flag6/index.html',
+                        hash: '5dcafa3a2ecdda1bb866705e69f086641494eb6f6c8d0e3120aed6a6f3be52ad'
+                    }
+                ]
+            },
+            {
+                id: 4,
+                title: 'Forensics',
+                icon: '🔬',
+                color: '#fbbf24',
+                flags: [
+                    {
+                        id: 'flag7',
+                        name: 'Flag 7 — Log Forensics',
+                        tech: 'Hidden message in syslog',
+                        link: 'flag7/index.html',
+                        hash: '4b9e4b97164867f5ee424d9b7c14f500468701f3a5e6bc2e13ba3a20d9aa7c27'
+                    },
+                    {
+                        id: 'flag8',
+                        name: 'Flag 8 — ZIP Crack',
+                        tech: 'Password-protected ZIP',
+                        link: 'flag8/index.html',
+                        hash: 'bf64dff3211e86ae6132403351f1fdba4d748a52681a191421fd63427044d615'
+                    }
+                ]
+            },
+            {
+                id: 5,
+                title: 'File Forensics',
+                icon: '📄',
+                color: '#00ff88',
+                flags: [
+                    {
+                        id: 'flag9',
+                        name: 'Flag 9 — PDF Metadata',
+                        tech: 'PDF author field forensics',
+                        link: 'flag9/index.html',
+                        hash: '0302479f28c68c4d6a7e89261e0df4b936c5507795bbad4cca735c26f69d1b0b'
+                    },
+                    {
+                        id: 'flag10',
+                        name: 'Flag 10 — Hidden in File',
+                        tech: 'ARTIMAS{} in text file',
+                        link: 'flag10/index.html',
+                        hash: '4f85f719ed29783fcd1d981254b84e7784b34f21606e3682c597fc7b3ae07860'
+                    }
+                ]
+            }
+        ];
+
+        // ─────────────────────────────────────────────────────────────────
+        // PROGRESS STATE (backed by server)
+        // ─────────────────────────────────────────────────────────────────
+        function loadProgress() { return currentProgress; }
+        function saveProgress(prog) { currentProgress = prog; }
+        function isModuleUnlocked(moduleIndex, prog) {
+            if (moduleIndex === 0) return true;
+            const prev = MODULES[moduleIndex - 1];
+            return prev.flags.every(f => prog[f.id]);
+        }
+        function isModuleComplete(mod, prog) {
+            return mod.flags.every(f => prog[f.id]);
+        }
+        function totalSolved(prog) {
+            return MODULES.flatMap(m => m.flags).filter(f => prog[f.id]).length;
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // RENDER
+        // ─────────────────────────────────────────────────────────────────
+        function render() {
+            const prog = loadProgress();
+            const grid = document.getElementById('modules-grid');
+            grid.innerHTML = '';
+
+            const solved = totalSolved(prog);
+            document.getElementById('global-progress').style.width = (solved / 10 * 100) + '%';
+            document.getElementById('progress-label').textContent = `${solved} / 10 FLAGS CAPTURED`;
+
+            document.getElementById('completion-screen').style.display =
+                solved === 10 ? 'block' : 'none';
+
+            MODULES.forEach((mod, idx) => {
+                const unlocked = isModuleUnlocked(idx, prog);
+                const complete = isModuleComplete(mod, prog);
+
+                const card = document.createElement('div');
+                card.className = 'module-card' + (complete ? ' completed' : '') + (!unlocked ? ' locked' : '');
+                card.id = `module-card-${mod.id}`;
+
+                //  Accent strip
+                const accent = document.createElement('div');
+                accent.className = 'module-accent';
+                accent.style.background = `linear-gradient(90deg, ${mod.color}, transparent)`;
+                card.appendChild(accent);
+
+                // Lock overlay
+                if (!unlocked) {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'lock-overlay';
+                    const prevMod = MODULES[idx - 1];
+                    overlay.innerHTML = `
+                    <div class="lock-icon">🔒</div>
+                    <div class="lock-msg">COMPLETE MODULE ${prevMod.id} FIRST</div>
+                `;
+                    card.appendChild(overlay);
+                }
+
+                // Header
+                const badgeClass = !unlocked ? 'badge-locked' : complete ? 'badge-done' : 'badge-active';
+                const badgeText = !unlocked ? 'LOCKED' : complete ? 'COMPLETE' : 'ACTIVE';
+                card.innerHTML += `
+                <div class="module-header">
+                    <div class="module-icon">${mod.icon}</div>
+                    <div class="module-meta">
+                        <div class="module-num">// MODULE ${mod.id}</div>
+                        <div class="module-title">${mod.title}</div>
+                    </div>
+                    <span class="module-status-badge ${badgeClass}">${badgeText}</span>
+                </div>
+            `;
+
+                // Flags list
+                const flagsList = document.createElement('div');
+                flagsList.className = 'flags-list';
+                mod.flags.forEach(f => {
+                    const solved = !!prog[f.id];
+                    const row = document.createElement('div');
+                    row.className = 'flag-row' + (solved ? ' solved' : '');
+                    row.innerHTML = `
+                    <div class="flag-dot ${solved ? 'done' : ''}"></div>
+                    <div class="flag-info">
+                        <span class="flag-name">${f.name}</span>
+                        <span class="flag-tech">${f.tech}</span>
+                    </div>
+                    ${unlocked && !solved ? `<a class="flag-link" href="${f.link}" target="_blank">OPEN →</a>` : ''}
+                    ${solved ? '<span class="flag-checkmark">✅</span>' : ''}
+                `;
+                    flagsList.appendChild(row);
+                });
+                card.appendChild(flagsList);
+
+                // Submission form (only if unlocked and not all done)
+                if (unlocked && !complete) {
+                    const section = document.createElement('div');
+                    section.className = 'submit-section';
+                    section.innerHTML = `
+                    <span class="submit-label">// Submit Flag</span>
+                    <div class="submit-row">
+                        <input
+                            type="text"
+                            class="flag-input"
+                            id="input-m${mod.id}"
+                            placeholder="ARTIMAS{...}"
+                            autocomplete="off"
+                            spellcheck="false"
+                        >
+                        <button class="submit-btn" onclick="submitFlag(${mod.id})">Submit</button>
+                    </div>
+                    <div class="submit-feedback" id="fb-m${mod.id}"></div>
+                `;
+                    card.appendChild(section);
+                } else if (complete) {
+                    card.innerHTML += `
+                    <div style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--green);letter-spacing:2px;margin-top:4px;">
+                        ✓ MODULE COMPLETE
+                    </div>
+                `;
+                }
+
+                grid.appendChild(card);
+            });
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // SUBMIT FLAG
+        // ─────────────────────────────────────────────────────────────────
+        async function submitFlag(moduleId) {
+            const mod = MODULES.find(m => m.id === moduleId);
+            const input = document.getElementById(`input-m${moduleId}`);
+            const fb = document.getElementById(`fb-m${moduleId}`);
+
+            const val = input.value.trim();
+            if (!val) {
+                fb.className = 'submit-feedback fb-error';
+                fb.textContent = 'ENTER A FLAG FIRST';
+                return;
+            }
+
+            fb.className = 'submit-feedback';
+            fb.textContent = 'Verifying...';
+
+            const res = await fetch('/api/scores/flag', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer: val })
+            }).then(r => r.json());
+
+            if (res.ok) {
+                currentProgress[res.flagId] = { solved: true, time: Date.now() };
+                const modIdx = MODULES.indexOf(mod);
+                const justCompleted = mod.flags.every(f => currentProgress[f.id]);
+
+                const banner = document.getElementById('success-banner');
+                banner.style.display = 'block';
+                banner.textContent = `✅ Flag accepted!` +
+                    (justCompleted && modIdx < MODULES.length - 1
+                        ? `  🔓 MODULE ${MODULES[modIdx + 1].id} — ${MODULES[modIdx + 1].title.toUpperCase()} UNLOCKED!`
+                        : '');
+                setTimeout(() => { banner.style.display = 'none'; }, 4000);
+                input.value = '';
+                render();
+            } else if (res.alreadySolved) {
+                fb.className = 'submit-feedback fb-error';
+                fb.textContent = 'FLAG ALREADY CAPTURED';
+                input.value = '';
+            } else {
+                fb.className = 'submit-feedback fb-error';
+                fb.textContent = '⚠ INVALID FLAG — TRY AGAIN';
+                input.value = '';
+            }
+        }
+
+        // Allow Enter key to submit
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter') return;
+            const active = document.activeElement;
+            if (active && active.classList.contains('flag-input')) {
+                const id = active.id.replace('input-m', '');
+                submitFlag(parseInt(id));
+            }
+        });
+
+        // ─────────────────────────────────────────────────────────────────
+        // RUN
+        // ─────────────────────────────────────────────────────────────────
+        init();
+
+        // ─────────────────────────────────────────────────────────────────
+        // EXPORT SCORE MODAL
+        // ─────────────────────────────────────────────────────────────────
+        const HMAC_KEY = 'ARTIMAS_CTF_HMAC_KEY_2025';
+
+        function openExportModal() {
+            document.getElementById('export-modal').classList.add('open');
+            const nameInput = document.getElementById('player-name-input');
+            nameInput.value = currentUser ? currentUser.username : '';
+            document.getElementById('token-output').style.display = 'none';
+            document.getElementById('copy-btn').style.display = 'none';
+            document.getElementById('token-output').value = '';
+        }
+        function closeExportModal() {
+            document.getElementById('export-modal').classList.remove('open');
+        }
+
+        async function hmacSign(message) {
+            const enc = new TextEncoder();
+            const key = await crypto.subtle.importKey(
+                'raw', enc.encode(HMAC_KEY),
+                { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+            );
+            const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+            return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function generateToken() {
+            const name = document.getElementById('player-name-input').value.trim();
+            if (!name) {
+                document.getElementById('player-name-input').focus();
+                return;
+            }
+
+            const prog = loadProgress();
+            const startTime = parseInt(localStorage.getItem('ctf_start_time') || Date.now());
+            const now = Date.now();
+            const totalElapsed = Math.floor((now - startTime) / 1000);
+            const allFlags = MODULES.flatMap(m => m.flags);
+            const solvedCount = allFlags.filter(f => prog[f.id]).length;
+
+            // Per-flag elapsed seconds (0 = not solved)
+            const flagTimes = allFlags.map(f => {
+                const entry = prog[f.id];
+                if (!entry) return 0;
+                const solveMs = typeof entry === 'object' ? entry.time : now;
+                return Math.floor((solveMs - startTime) / 1000);
+            });
+
+            const payload = [name, solvedCount, totalElapsed, ...flagTimes].join('|');
+            const sig = await hmacSign(payload);
+            const token = payload + '|' + sig;
+
+            const ta = document.getElementById('token-output');
+            ta.value = token;
+            ta.style.display = 'block';
+            document.getElementById('copy-btn').style.display = 'block';
+        }
+
+        function copyToken() {
+            const ta = document.getElementById('token-output');
+            ta.select();
+            navigator.clipboard.writeText(ta.value).then(() => {
+                const btn = document.getElementById('copy-btn');
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => { btn.textContent = '📋 Copy Token'; }, 2000);
+            });
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // CANVAS PARTICLE BACKGROUND
+        // ─────────────────────────────────────────────────────────────────
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let w, h, particles = [];
+
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        for (let i = 0; i < 80; i++) {
+            particles.push({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                vx: Math.random() * 0.3 - 0.15,
+                vy: Math.random() * 0.3 - 0.15,
+                color: Math.random() > 0.5 ? '0,229,255' : '0,255,136'
+            });
+        }
+
+        function animateBg() {
+            ctx.clearRect(0, 0, w, h);
+            particles.forEach((p, i) => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+                if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 1, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${p.color},0.2)`;
+                ctx.fill();
+
+                // Light connections
+                for (let j = i + 1; j < particles.length; j++) {
+                    const q = particles[j];
+                    const dx = p.x - q.x, dy = p.y - q.y;
+                    const d = Math.sqrt(dx * dx + dy * dy);
+                    if (d < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(q.x, q.y);
+                        ctx.strokeStyle = `rgba(0,229,255,${0.06 * (1 - d / 120)})`;
+                        ctx.lineWidth = 0.4;
+                        ctx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+    </script>
+</body>
+
+</html>

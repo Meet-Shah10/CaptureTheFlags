@@ -2,182 +2,267 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flag 4 | Caesar Cipher Challenge</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIPHER_04 | ARTIMAS CTF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;700&display=swap"
+        rel="stylesheet">
     <style>
-        * {
+        :root {
+            --neon-orange: #ff6b35;
+            --dark-bg: #03010a;
+            --border: rgba(255, 107, 53, 0.3);
+        }
+
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
         body {
+            background: var(--dark-bg);
+            color: #e0f7ff;
+            font-family: 'Exo 2', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #0f172a;
-            font-family: 'Segoe UI', sans-serif;
-            color: #e2e8f0;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 600px;
         }
 
         .card {
-            background: #1e293b;
-            border: 1px solid #334155;
+            background: rgba(15, 5, 0, 0.9);
+            border: 1px solid var(--border);
             border-radius: 14px;
-            padding: 52px 60px;
+            padding: 44px;
             text-align: center;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-            max-width: 580px;
-            width: 90%;
+            box-shadow: 0 0 40px rgba(255, 107, 53, 0.1);
+            backdrop-filter: blur(10px);
         }
 
-        h1 {
+        .eyebrow {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            color: #4a5568;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .title {
+            font-family: 'Share Tech Mono', monospace;
             font-size: 1.7rem;
-            color: #f1f5f9;
+            color: var(--neon-orange);
+            text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
             margin-bottom: 10px;
         }
 
         .subtitle {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: #64748b;
-            margin-bottom: 36px;
+            line-height: 1.6;
+            margin-bottom: 30px;
         }
 
-        .label {
-            font-size: 0.75rem;
-            letter-spacing: 0.12em;
+        .signal-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            color: var(--neon-orange);
             text-transform: uppercase;
-            color: #475569;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .cipher-box {
-            background: #0f172a;
-            border: 1px solid #334155;
+            background: rgba(255, 107, 53, 0.05);
+            border: 1px solid rgba(255, 107, 53, 0.2);
             border-radius: 10px;
-            padding: 18px 24px;
-            font-family: 'Courier New', monospace;
-            font-size: 1.1rem;
-            color: #f97316;
+            padding: 22px 24px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.15rem;
+            color: var(--neon-orange);
             word-break: break-all;
-            letter-spacing: 0.05em;
             cursor: text;
             user-select: all;
+            letter-spacing: .06em;
+            transition: border-color .3s;
         }
 
-        .copy-btn {
-            margin-top: 20px;
-            background: #c2410c;
-            color: #fff7ed;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 28px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: background 0.2s;
+        .cipher-box:hover {
+            border-color: var(--neon-orange);
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.15);
         }
 
-        .copy-btn:hover {
-            background: #ea580c;
-        }
-
-        .copy-btn:active {
-            background: #9a3412;
-        }
-
-        .copied-msg {
-            display: none;
-            margin-top: 10px;
-            font-size: 0.8rem;
-            color: #4ade80;
-        }
-
-        .hint {
-            margin-top: 28px;
-            background: #1a1a2e;
-            border-left: 3px solid #f97316;
+        .btn {
+            margin-top: 18px;
+            background: transparent;
+            border: 1px solid rgba(255, 107, 53, 0.4);
             border-radius: 6px;
-            padding: 12px 16px;
-            text-align: left;
+            padding: 10px 28px;
+            color: var(--neon-orange);
+            font-family: 'Exo 2', sans-serif;
             font-size: 0.85rem;
-            color: #fdba74;
-            line-height: 1.6;
-        }
-
-        .hint span {
-            display: block;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #f97316;
-            margin-bottom: 4px;
             font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all .3s;
         }
 
-        .shift-visual {
-            margin-top: 28px;
+        .btn:hover {
+            background: rgba(255, 107, 53, 0.08);
+            border-color: var(--neon-orange);
+        }
+
+        .copied {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            color: #00ff88;
+            margin-top: 10px;
+            min-height: 1em;
+        }
+
+        .shift-row {
             display: flex;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             flex-wrap: wrap;
+            margin-top: 24px;
         }
 
-        .shift-item {
-            background: #0f172a;
-            border: 1px solid #334155;
+        .shift-chip {
+            background: rgba(255, 107, 53, 0.08);
+            border: 1px solid rgba(255, 107, 53, 0.2);
             border-radius: 6px;
-            padding: 6px 10px;
-            font-family: monospace;
-            font-size: 0.8rem;
+            padding: 7px 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.82rem;
             color: #94a3b8;
         }
 
-        .shift-item span {
-            color: #f97316;
+        .shift-chip span {
+            color: var(--neon-orange);
+        }
+
+        .hint-block {
+            margin-top: 24px;
+            background: rgba(255, 107, 53, 0.04);
+            border-left: 3px solid rgba(255, 107, 53, 0.4);
+            border-radius: 6px;
+            padding: 14px 18px;
+            text-align: left;
+        }
+
+        .hint-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: rgba(255, 107, 53, 0.6);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .hint-text {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.6;
         }
     </style>
 </head>
 
 <body>
-    <div class="card">
-        <h1>🔑 Flag 4 — Shift It Back!</h1>
-        <p class="subtitle">This message was scrambled using a classic cipher. Can you reverse it?</p>
+    <canvas id="bg-canvas"></canvas>
+    <div class="container">
+        <div class="card">
+            <div class="eyebrow">// Encrypted Communication</div>
+            <div class="title">🔐 Double the Security?</div>
+            <p class="subtitle">This message has been double-locked. A classic Caesar cipher wasn't enough, so they
+                wrapped it in another layer of encoding. Peel it back to reveal the truth.</p>
 
-        <p class="label">Encrypted Text</p>
-        <div class="cipher-box" id="cipherText">
-            DUWLPDV{fdhvdu_flskhu_fudfnhg}
-        </div>
+            <div class="signal-label">// Encrypted Payload</div>
+            <div class="cipher-box" id="cipherText">RFVXTFBEVntmZGh2ZHVfZmxza2h1X2Z1ZGZuaGd9</div>
+            <button class="btn" onclick="doCopy()">📋 Copy Signal</button>
+            <div class="copied" id="copied"></div>
 
-        <button class="copy-btn" onclick="copyText()">📋 Copy Text</button>
-        <p class="copied-msg" id="copiedMsg">✅ Copied to clipboard!</p>
+            <div class="hint-block">
+                <span class="hint-label">💡 Analyst Note</span>
+                <span class="hint-text">This is a trial of veils, not letters alone.
+                    First, read the skin of the riddle—
+                    the alphabet in its full regalia:
+                    upper and lower, digit and sign,
+                    each symbol a gate that opens only once.
 
-        <div class="hint">
-            <span>💡 Hint</span>
-            Julius Caesar famously used this technique to protect his messages.
-            Each letter has been shifted by a small, single-digit number in the alphabet.
-            Try shifting it back!
-        </div>
-
-        <div class="shift-visual">
-            <div class="shift-item">A → <span>D</span></div>
-            <div class="shift-item">B → <span>E</span></div>
-            <div class="shift-item">C → <span>F</span></div>
-            <div class="shift-item">... → <span>...</span></div>
-            <div class="shift-item">Z → <span>C</span></div>
+                    What you uncover is not the truth,
+                    but a whisper of it.
+                    Take that whisper and turn it—
+                    shift it, distrust it, let it slide
+                    until meaning confesses.</span>
+            </div>
         </div>
     </div>
-
+    <!-- Submit Strip -->
+    <div
+        style="max-width:600px;margin:18px auto 0;background:rgba(8,4,22,0.9);border:1px solid rgba(255,107,53,0.15);border-radius:12px;padding:18px;font-family:'Share Tech Mono',monospace;position:relative;z-index:2;">
+        <span
+            style="font-size:0.68rem;letter-spacing:3px;color:#4a5568;text-transform:uppercase;display:block;margin-bottom:10px;">//
+            Submit Flag 4</span>
+        <div style="display:flex;gap:8px;">
+            <input type="text" id="fi4" placeholder="ARTIMAS{...}" autocomplete="off" spellcheck="false"
+                style="flex:1;background:rgba(255,107,53,0.04);border:1px solid rgba(255,107,53,0.15);border-radius:6px;padding:10px 14px;color:white;font-family:'Share Tech Mono',monospace;font-size:0.82rem;outline:none;">
+            <button onclick="submitFlag4()"
+                style="background:linear-gradient(135deg,#ff6b35,#f59e0b);border:none;border-radius:6px;padding:10px 18px;color:black;font-family:'Exo 2',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Submit</button>
+        </div>
+        <div id="fb4" style="margin-top:8px;font-size:0.75rem;min-height:1.1em;"></div>
+        <a href="../index.html"
+            style="display:inline-block;margin-top:12px;font-size:0.72rem;letter-spacing:2px;color:#4a5568;text-decoration:none;border:1px solid #1e293b;border-radius:6px;padding:6px 16px;">←
+            Return to Hub</a>
+    </div>
     <script>
-        function copyText() {
-            const text = document.getElementById('cipherText').innerText.trim();
-            navigator.clipboard.writeText(text).then(() => {
-                const msg = document.getElementById('copiedMsg');
-                msg.style.display = 'block';
-                setTimeout(() => msg.style.display = 'none', 2000);
-            });
+
+        function doCopy() { navigator.clipboard.writeText(document.getElementById('cipherText').innerText.trim()); const e = document.getElementById('copied'); e.textContent = '✅ Copied!'; setTimeout(() => e.textContent = '', 2000); }
+        const canvas = document.getElementById('bg-canvas'), ctx = canvas.getContext('2d');
+        let w, h, p = []; function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+        for (let i = 0; i < 50; i++)p.push({ x: Math.random() * w, y: Math.random() * h, vx: Math.random() * .45 - .225, vy: Math.random() * .45 - .225 });
+        function draw() { ctx.clearRect(0, 0, w, h); p.forEach(q => { q.x += q.vx; q.y += q.vy; if (q.x < 0) q.x = w; if (q.x > w) q.x = 0; if (q.y < 0) q.y = h; if (q.y > h) q.y = 0; ctx.beginPath(); ctx.arc(q.x, q.y, 1, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,107,53,0.2)'; ctx.fill(); }); requestAnimationFrame(draw); }
+        draw();
+        // ── Flag Submission ──
+        async function submitFlag4() {
+            const val = document.getElementById('fi4').value.trim();
+            const fb = document.getElementById('fb4');
+            if (!val) { fb.style.color = '#ff3e3e'; fb.textContent = 'Enter the flag first'; return; }
+            fb.style.color = '#00e5ff'; fb.textContent = 'Verifying...';
+            const res = await fetch('/api/scores/flag', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer: val })
+            }).then(r => r.json());
+            if (res.ok) {
+                fb.style.color = '#00ff88'; fb.textContent = '✅ CORRECT! FLAG 4 CAPTURED — Returning...';
+                setTimeout(() => { window.location.href = '/index.html'; }, 1200);
+            } else if (res.alreadySolved) {
+                fb.style.color = '#fbbf24'; fb.textContent = '⚡ Already captured — Returning...';
+                setTimeout(() => { window.location.href = '/index.html'; }, 1200);
+            } else { fb.style.color = '#ff3e3e'; fb.textContent = '⚠ Invalid flag — try again'; }
         }
+        document.addEventListener('keydown', e => { if (e.key === 'Enter' && document.activeElement.id === 'fi4') submitFlag4(); });
     </script>
 </body>
 

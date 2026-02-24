@@ -2,69 +2,180 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Panel</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORE_DASHBOARD | ARTIMAS CTF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;700&display=swap"
+        rel="stylesheet">
     <style>
-        * {
+        :root {
+            --neon-green: #00ff88;
+            --neon-cyan: #00e5ff;
+            --dark-bg: #03010a;
+            --border: rgba(0, 255, 136, 0.3);
+        }
+
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
         body {
+            background: var(--dark-bg);
+            color: #e0f7ff;
+            font-family: 'Exo 2', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #0f172a;
-            font-family: 'Segoe UI', sans-serif;
-            color: #e2e8f0;
+            overflow: hidden;
         }
 
-        .card {
-            background: #1e293b;
-            border: 1px solid #334155;
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 620px;
+            padding: 20px;
+        }
+
+        .admin-card {
+            background: rgba(10, 15, 30, 0.9);
+            border: 1px solid var(--border);
             border-radius: 14px;
-            padding: 52px 64px;
+            padding: 44px;
             text-align: center;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-            max-width: 480px;
+            box-shadow: 0 0 60px rgba(0, 255, 136, 0.12);
+            backdrop-filter: blur(12px);
+            position: relative;
+            overflow: hidden;
         }
 
-        h1 {
-            font-size: 1.6rem;
-            color: #f1f5f9;
-            margin-bottom: 24px;
+        .admin-card::before {
+            content: 'INTERNAL_ACCESS_ONLY';
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--neon-green);
+            opacity: 0.4;
+            letter-spacing: 2px;
         }
 
-        .flag {
-            display: inline-block;
-            background: #0d9488;
-            color: #f0fdfa;
-            font-size: 1.1rem;
-            font-weight: 600;
-            font-family: monospace;
-            border-radius: 8px;
-            padding: 14px 28px;
-            letter-spacing: 0.04em;
-            box-shadow: 0 4px 20px rgba(13, 148, 136, 0.35);
+        .grid-bg {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(0, 255, 136, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 136, 0.04) 1px, transparent 1px);
+            background-size: 22px 22px;
+            pointer-events: none;
         }
 
-        p {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: #94a3b8;
+        .header {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--neon-green);
+            font-size: 2rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 12px var(--neon-green);
+            margin-bottom: 28px;
+        }
+
+        .status {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.82rem;
+            color: #6b8fa8;
+            margin-bottom: 28px;
+        }
+
+        .flag-box {
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px dashed var(--neon-green);
+            border-radius: 10px;
+            padding: 28px;
+            margin: 24px 0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .flag-box:hover {
+            background: rgba(0, 255, 136, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+        }
+
+        .flag-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            color: #6b8fa8;
+            margin-bottom: 10px;
+            display: block;
+            letter-spacing: 2px;
+        }
+
+        .flag-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.35rem;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+
+        .note {
+            font-size: 0.78rem;
+            color: #4a5568;
+            margin-top: 8px;
         }
     </style>
 </head>
 
 <body>
-    <div class="card">
-        <h1>🔐 Admin Panel</h1>
-        <div class="flag">Flag: ARTIMAS{found_admin_panel}</div>
-        <p>You found the hidden admin page. Congratulations!</p>
+    <canvas id="bg-canvas"></canvas>
+    <div class="container">
+        <div class="admin-card">
+            <div class="grid-bg"></div>
+            <div class="header">⚡ Admin Portal</div>
+            <div class="status">AUTHENTICATION: BYPASSED &nbsp;|&nbsp; CLEARANCE LEVEL: ROOT</div>
+            <p style="color:#94a3b8;font-size:0.9rem;line-height:1.6;margin-bottom:16px;">Welcome, Authorized
+                Administrator. Security perimeter breached successfully. The data vault has been unlocked.</p>
+            <div class="flag-box">
+                <span class="flag-label">RECOVERED_CREDENTIAL</span>
+                <div class="flag-value" id="flag-display">Loading...</div>
+            </div>
+            <div class="note">This access has been logged. Powered by ARTIMAS SECURITY v4.2</div>
+            <div style="margin-top:24px;">
+                <a href="../index.html"
+                    style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:2px;color:#4a5568;text-decoration:none;border:1px solid #1e293b;border-radius:6px;padding:7px 18px;transition:color 0.2s;"
+                    onmouseover="this.style.color='#00ff88';this.style.borderColor='rgba(0,255,136,0.3)'"
+                    onmouseout="this.style.color='#4a5568';this.style.borderColor='#1e293b'">← Return to Hub</a>
+            </div>
+        </div>
     </div>
+    <script>
+        const canvas = document.getElementById('bg-canvas'), ctx = canvas.getContext('2d');
+        let w, h, p = [];
+        function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+        for (let i = 0; i < 60; i++)p.push({ x: Math.random() * w, y: Math.random() * h, vx: Math.random() * .5 - .25, vy: Math.random() * .5 - .25 });
+        function draw() { ctx.clearRect(0, 0, w, h); p.forEach(q => { q.x += q.vx; q.y += q.vy; if (q.x < 0) q.x = w; if (q.x > w) q.x = 0; if (q.y < 0) q.y = h; if (q.y > h) q.y = 0; ctx.beginPath(); ctx.arc(q.x, q.y, 1.2, 0, Math.PI * 2); ctx.fillStyle = 'rgba(0,255,136,0.25)'; ctx.fill(); }); requestAnimationFrame(draw); }
+        draw();
+        // Auto-save flag2 when admin panel is accessed
+        (async function () {
+            const f = 'ARTIMAS{found_admin_panel}';
+            document.getElementById('flag-display').innerText = f;
+            await fetch('/api/scores/flag', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer: f })
+            });
+        })();
+    </script>
 </body>
 
 </html>

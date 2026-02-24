@@ -1,7 +1,26 @@
 # 🚩 CTF Challenge Master Index — ARTIMAS Series
 
-All challenges are inside numbered folders under `ctf-challenges/`.
-This file lists every flag, how it's hidden, and exactly how to find it.
+## 🚀 Running the Platform
+
+This CTF platform is powered by a Node.js backend. You **must** access it through the server URL, not by opening HTML files directly.
+
+### 1. Start the Server
+In your terminal, run:
+```bash
+node server.js
+```
+
+### 2. Access the Hub
+Open your browser and navigate to:
+**[http://localhost:3000](http://localhost:3000)**
+
+> [!IMPORTANT]
+> **Do not double-click .html files.** 
+> Opening files via `file://` will cause login and flag submissions to fail due to browser security restrictions (CORS).
+
+### 3. Stop the Server
+To stop the server, go to the terminal where it's running and press:
+`Ctrl + C`
 
 ---
 
@@ -12,12 +31,13 @@ This file lists every flag, how it's hidden, and exactly how to find it.
 | **Folder** | `flag1/` |
 | **File** | `Flag 1.html` |
 | **Flag** | `ARTIMAS{view_source_reveals_secret}` |
-| **Technique** | HTML comment hidden in page source |
+| **Technique** | Fragmented Base64 packets in source |
 
 **How to solve:**
 1. Open `Flag 1.html` in a browser
 2. Right-click → **View Page Source** (or press `Ctrl+U`)
-3. Search for `<!--` — the flag is inside the HTML comment
+3. Search for "PACKET" in the script block.
+4. Decode the three Base64 fragments and join them.
 
 ---
 
@@ -44,34 +64,33 @@ This file lists every flag, how it's hidden, and exactly how to find it.
 | **Folder** | `flag3/` |
 | **File** | `flag3.html` |
 | **Flag** | `ARTIMAS{base64_decoded_successfully}` |
-| **Encoded** | `QVJUSUlBU3tiYXNlNjRfZGVjb2RlZF9zdWNjZXNzZnVsbHl9` |
+| **Encoded** | `QVJUSU1BU3tiYXNlNjRfZGVjb2RlZF9zdWNjZXNzZnVsbHl9` |
 | **Technique** | Base64 decoding |
 
 **How to solve:**
 1. Open `flag3.html` — displays the encoded string
 2. Decode using any tool:
    - Online: [base64decode.org](https://www.base64decode.org)
-   - Terminal: `echo "QVJUSUlBU3tiYXNlNjRfZGVjb2RlZF9zdWNjZXNzZnVsbHl9" | base64 -d`
+   - Terminal: `echo "QVJUSU1BU3tiYXNlNjRfZGVjb2RlZF9zdWNjZXNzZnVsbHl9" | base64 -d`
 3. Result → flag
 
 ---
 
-## Flag 4 — Caesar Cipher Cracked
+## Flag 4 — Multi-Layer Decryption Master
 
 | | |
 |---|---|
 | **Folder** | `flag4/` |
 | **File** | `flag4.html` |
 | **Flag** | `ARTIMAS{caesar_cipher_cracked}` |
-| **Encrypted** | `DUWLPDV{fdhvdu_flskhu_fudfnhg}` |
-| **Technique** | Caesar cipher — shift of **3** (shift back by 3 to decode) |
+| **Encrypted** | `RFVXTFBEVntmZGh2ZHVfZmxza2h1X2Z1ZGZuaGd9` |
+| **Technique** | Base64 → Caesar Cipher (shift 3) |
 
 **How to solve:**
-1. Open `flag4.html` — displays the ciphertext
-2. Apply ROT-3 in reverse (shift each letter back by 3):
-   - Online: [cryptii.com](https://cryptii.com/pipes/caesar-cipher) → shift 23 (or -3)
-   - Or manually: D→A, U→R, W→T …
-3. Result → flag
+1. Open `flag4.html` — displays the encoded payload.
+2. Peel back **Layer 1**: Decode from Base64 (using `atob` or terminal).
+3. Peel back **Layer 2**: Shift the result back by 3 (D→A).
+4. Result → flag
 
 ---
 
@@ -100,7 +119,7 @@ This file lists every flag, how it's hidden, and exactly how to find it.
 |---|---|
 | **Folder** | `flag6/` |
 | **Files** | `index.html`, `mock_profile.html`, `SETUP.md` |
-| **Flag** | `ARTIMAS{osint_profile_traced}` |
+| **Flag** | `ARTIMAS{0s1nt_pr0f1l3_tr4c3d}` |
 | **Technique** | OSINT — username search across platforms |
 
 **How to solve:**
@@ -171,22 +190,20 @@ This file lists every flag, how it's hidden, and exactly how to find it.
 
 ---
 
-## Flag 10 — Password in Plain Sight
+## Flag 10 — Signal in the Headers
 
 | | |
 |---|---|
 | **Folder** | `flag10/` |
-| **Files** | `notes.txt`, `index.html`, `SETUP.md` |
-| **Flag** | `ARTIMAS{password_found_in_file}` |
-| **Technique** | General Investigation — searching for the flag in a text file |
+| **Files** | `index.html`, `SETUP.md` |
+| **Flag** | `ARTIMAS{http_header_mastered}` |
+| **Technique** | HTTP Recon — flag hidden in Response Headers |
 
 **How to solve:**
-1. Download `notes.txt` from `index.html`.
-2. Open the file and search for the flag pattern:
-   - **Manual:** Read the list of reminders.
-   - **CLI:** `grep "ARTIMAS" notes.txt`.
-   - **Editor:** Use `Ctrl + F` and search for "ARTIMAS".
-3. Result → flag
+1. Open Flag 10.
+2. Open Browser DevTools (F12) → **Network** tab.
+3. Refresh and click the page request.
+4. Check **Response Headers** for `X-Flag-Header`.
 
 ---
 
@@ -199,8 +216,8 @@ This file lists every flag, how it's hidden, and exactly how to find it.
 | 3 | `ARTIMAS{base64_decoded_successfully}` | Base64 decode |
 | 4 | `ARTIMAS{caesar_cipher_cracked}` | Caesar cipher (shift 3) |
 | 5 | `ARTIMAS{location_identified_correctly}` | EXIF ImageDescription |
-| 6 | `ARTIMAS{osint_profile_traced}` | OSINT username search |
+| 6 | `ARTIMAS{0s1nt_pr0f1l3_tr4c3d}` | OSINT username search |
 | 7 | `ARTIMAS{hidden_message_extracted}` | Forensics — hidden in log |
 | 8 | `ARTIMAS{zip_password_cracked}` | Password-protected ZIP (pw: `artimas2026`) |
 | 9 | `ARTIMAS{metadata_tells_all}` | PDF Forensics — Author metadata field |
-| 10 | `ARTIMAS{password_found_in_file}` | General Investigation — flag hidden in notes.txt |
+| 10 | `ARTIMAS{http_header_mastered}` | Response Headers |

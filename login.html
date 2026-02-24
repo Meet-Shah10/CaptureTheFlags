@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARTIMAS CTF — Login</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --cyan: #00e5ff;
+            --green: #00ff88;
+            --purple: #bf00ff;
+            --red: #ff3e3e;
+            --dark: #03010a;
+            --card: rgba(8, 4, 22, 0.97);
+            --border: rgba(0, 229, 255, 0.2);
+            --text: #e0f7ff;
+            --muted: #64748b;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--dark);
+            color: var(--text);
+            font-family: 'Exo 2', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .outer {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 460px;
+            padding: 24px;
+        }
+
+        /* ── Branding ── */
+        .brand {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .brand .eye {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.62rem;
+            letter-spacing: 6px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .brand h1 {
+            font-size: clamp(1.8rem, 5vw, 2.6rem);
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--cyan), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+        }
+
+        .brand .tagline {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        /* ── Card ── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 0 60px rgba(0, 229, 255, 0.07);
+        }
+
+        /* ── Tabs ── */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px;
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.72rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: var(--cyan);
+            border-bottom: 2px solid var(--cyan);
+            background: rgba(0, 229, 255, 0.04);
+        }
+
+        /* ── Form ── */
+        .form-body {
+            padding: 32px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+
+        input {
+            width: 100%;
+            background: rgba(0, 229, 255, 0.04);
+            border: 1px solid rgba(0, 229, 255, 0.18);
+            border-radius: 6px;
+            padding: 11px 14px;
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.86rem;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.12);
+        }
+
+        input::placeholder {
+            color: #2d3748;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            color: black;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 700;
+            font-size: 0.88rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #login-btn {
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+        }
+
+        #register-btn {
+            background: linear-gradient(135deg, var(--green), var(--cyan));
+        }
+
+        .submit-btn:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 229, 255, 0.25);
+        }
+
+        .msg {
+            margin-top: 14px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.72rem;
+            text-align: center;
+            min-height: 1em;
+        }
+
+        .err {
+            color: var(--red);
+        }
+
+        .ok {
+            color: var(--green);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.6rem;
+            color: #2d3748;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="outer">
+        <div class="brand">
+            <div class="eye">// ARTIMAS Capture The Flag</div>
+            <h1>Mission Control</h1>
+            <div class="tagline">5 Modules · 10 Challenges · Hack The Future</div>
+        </div>
+
+        <div class="card">
+            <div class="tabs">
+                <button class="tab active" id="tab-login" onclick="showTab('login')">Login</button>
+                <button class="tab" id="tab-register" onclick="showTab('register')">Register</button>
+            </div>
+
+            <!-- Login -->
+            <div class="form-body" id="form-login">
+                <div class="field">
+                    <label for="l-user">Username</label>
+                    <input type="text" id="l-user" placeholder="Enter username..." autocomplete="username">
+                </div>
+                <div class="field">
+                    <label for="l-pw">Password</label>
+                    <input type="password" id="l-pw" placeholder="Enter password..." autocomplete="current-password">
+                </div>
+                <button class="submit-btn" id="login-btn" onclick="doLogin()">Sign In →</button>
+                <div class="msg" id="login-msg"></div>
+            </div>
+
+            <!-- Register -->
+            <div class="form-body" id="form-register" style="display:none;">
+                <div class="field">
+                    <label for="r-user">Choose a Username / Team Name</label>
+                    <input type="text" id="r-user" placeholder="e.g. Team Hydra" maxlength="40" autocomplete="username">
+                </div>
+                <div class="field">
+                    <label for="r-pw">Password</label>
+                    <input type="password" id="r-pw" placeholder="Choose a password..." autocomplete="new-password">
+                </div>
+                <div class="field">
+                    <label for="r-pw2">Confirm Password</label>
+                    <input type="password" id="r-pw2" placeholder="Repeat password..." autocomplete="new-password">
+                </div>
+                <button class="submit-btn" id="register-btn" onclick="doRegister()">Create Account →</button>
+                <div class="msg" id="register-msg"></div>
+            </div>
+        </div>
+
+        <div class="footer">// ARTIMAS · INTERNAL CTF PLATFORM · 2025</div>
+    </div>
+
+    <script>
+        // If already logged in, redirect appropriately
+        fetch('/api/me').then(r => r.json()).then(d => {
+            if (d.authenticated) {
+                window.location.href = d.role === 'admin' ? '/admin/leaderboard.html' : '/index.html';
+            }
+        });
+
+        function showTab(t) {
+            document.getElementById('form-login').style.display = t === 'login' ? 'block' : 'none';
+            document.getElementById('form-register').style.display = t === 'register' ? 'block' : 'none';
+            document.getElementById('tab-login').className = 'tab' + (t === 'login' ? ' active' : '');
+            document.getElementById('tab-register').className = 'tab' + (t === 'register' ? ' active' : '');
+        }
+
+        async function doLogin() {
+            const btn = document.getElementById('login-btn');
+            const msg = document.getElementById('login-msg');
+            const username = document.getElementById('l-user').value.trim();
+            const password = document.getElementById('l-pw').value;
+
+            if (!username || !password) { msg.className = 'msg err'; msg.textContent = 'Fill in all fields.'; return; }
+
+            btn.disabled = true; btn.textContent = 'Authenticating...';
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            }).then(r => r.json());
+            btn.disabled = false; btn.textContent = 'Sign In →';
+
+            if (res.ok) {
+                msg.className = 'msg ok';
+                msg.textContent = res.role === 'admin' ? '✅ Admin authenticated. Redirecting...' : '✅ Welcome! Loading hub...';
+                setTimeout(() => {
+                    window.location.href = res.role === 'admin' ? '/admin/leaderboard.html' : '/index.html';
+                }, 600);
+            } else {
+                msg.className = 'msg err';
+                msg.textContent = '⚠ ' + res.error;
+            }
+        }
+
+        async function doRegister() {
+            const btn = document.getElementById('register-btn');
+            const msg = document.getElementById('register-msg');
+            const username = document.getElementById('r-user').value.trim();
+            const password = document.getElementById('r-pw').value;
+            const confirm = document.getElementById('r-pw2').value;
+
+            if (!username || !password || !confirm) { msg.className = 'msg err'; msg.textContent = 'Fill in all fields.'; return; }
+            if (password !== confirm) { msg.className = 'msg err'; msg.textContent = '⚠ Passwords do not match.'; return; }
+
+            btn.disabled = true; btn.textContent = 'Registering...';
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            }).then(r => r.json());
+            btn.disabled = false; btn.textContent = 'Create Account →';
+
+            if (res.ok) {
+                msg.className = 'msg ok';
+                msg.textContent = '✅ Account created! Entering hub...';
+                setTimeout(() => { window.location.href = '/index.html'; }, 600);
+            } else {
+                msg.className = 'msg err';
+                msg.textContent = '⚠ ' + res.error;
+            }
+        }
+
+        // Enter key support
+        document.addEventListener('keydown', e => {
+            if (e.key !== 'Enter') return;
+            const loginVisible = document.getElementById('form-login').style.display !== 'none';
+            if (loginVisible) doLogin(); else doRegister();
+        });
+
+        // Particle background
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let w, h, particles = [];
+        function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+        for (let i = 0; i < 50; i++) particles.push({
+            x: Math.random() * w, y: Math.random() * h,
+            vx: Math.random() * 0.3 - 0.15, vy: Math.random() * 0.3 - 0.15,
+            color: Math.random() > 0.5 ? '0,229,255' : '0,255,136'
+        });
+        function animate() {
+            ctx.clearRect(0, 0, w, h);
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+                if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 1, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${p.color},0.25)`; ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+
+</html>

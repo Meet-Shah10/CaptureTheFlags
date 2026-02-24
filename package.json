@@ -1,0 +1,15 @@
+{
+    "name": "artimas-ctf",
+    "version": "1.0.0",
+    "description": "ARTIMAS Capture The Flag Platform",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "node server.js"
+    },
+    "dependencies": {
+        "sqlite3": "^5.1.7",
+        "express": "^4.18.2",
+        "express-session": "^1.18.0"
+    }
+}
