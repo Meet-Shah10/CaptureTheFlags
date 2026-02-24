@@ -29,9 +29,13 @@ const FLAG_ORDER = ['flag1', 'flag2', 'flag3', 'flag4', 'flag5', 'flag6', 'flag7
 // ──────────────────────────────────────────────────────────────────────────
 // DATABASE
 // ──────────────────────────────────────────────────────────────────────────
-if (!fs.existsSync('./db')) fs.mkdirSync('./db');
+const isVercel = process.env.VERCEL || process.env.NOW_BUILDER;
+const dbDir = isVercel ? '/tmp' : './db';
+const dbPath = isVercel ? '/tmp/ctf.db' : './db/ctf.db';
 
-const db = new sqlite3.Database('./db/ctf.db');
+if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
+
+const db = new sqlite3.Database(dbPath);
 
 // Promisify helpers
 const dbRun = (sql, params = []) => new Promise((res, rej) =>
