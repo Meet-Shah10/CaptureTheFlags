@@ -78,26 +78,38 @@ const dbAll = (sql, params = []) => new Promise((res, rej) => {
 });
 
 async function initDB() {
-        )
-    `);
-    await dbRun(`
-        CREATE TABLE IF NOT EXISTS user_progress(
-        id         INTEGER PRIMARY KEY AUTOINCREMENT,
-        username   TEXT NOT NULL,
-        flag_id    TEXT NOT NULL,
-        solved_at  INTEGER NOT NULL,
-        UNIQUE(username, flag_id)
-    )
-    `);
+    try {
+        console.log('[INIT] Initializing schema...');
+        await dbRun(`
+            CREATE TABLE IF NOT EXISTS users (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                username   TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                role       TEXT NOT NULL DEFAULT 'participant',
+                created_at INTEGER NOT NULL
+            )
+        `);
+        await dbRun(`
+            CREATE TABLE IF NOT EXISTS user_progress (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                username   TEXT NOT NULL,
+                flag_id    TEXT NOT NULL,
+                solved_at  INTEGER NOT NULL,
+                UNIQUE(username, flag_id)
+            )
+        `);
 
-    // Create default admin if none exists
-    const admin = await dbGet("SELECT id FROM users WHERE role = 'admin'");
-    if (!admin) {
-        await dbRun(
-            'INSERT INTO users (username, password_hash, role, created_at) VALUES (?,?,?,?)',
-            ['admin', hashPw('ctf_admin'), 'admin', Date.now()]
-        );
-        console.log('✓ Default admin created  →  username: admin  |  password: ctf_admin');
+        // Create default admin if none exists
+        const admin = await dbGet("SELECT id FROM users WHERE role = 'admin'");
+        if (!admin) {
+            await dbRun(
+                'INSERT INTO users (username, password_hash, role, created_at) VALUES (?,?,?,?)',
+                ['admin', hashPw('ctf_admin'), 'admin', Date.now()]
+            );
+            console.log('✓ Default admin created  →  username: admin  |  password: ctf_admin');
+        }
+    } catch (err) {
+        console.error(`[ERROR] Database initialization failed: ${err.message}`);
     }
 }
 
@@ -334,11 +346,11 @@ initDB().then(() => {
         console.log('║         ARTIMAS CTF Server — Running              ║');
         console.log('╠══════════════════════════════════════════════════╣');
         console.log(`║  URL    →  http://localhost:${PORT}                 ║`);
-    console.log('║  Admin  →  username: admin  |  pw: ctf_admin      ║');
-    console.log('╚══════════════════════════════════════════════════╝\n');
-    console.log('Share your machine\'s local IP for LAN access.\n');
-});
-}).catch (err => {
+        console.log('║  Admin  →  username: admin  |  pw: ctf_admin      ║');
+        console.log('╚══════════════════════════════════════════════════╝\n');
+        console.log('Share your machine\'s local IP for LAN access.\n');
+    });
+}).catch(err => {
     console.error('Failed to initialize database:', err);
     process.exit(1);
 });
