@@ -1,9 +1,17 @@
 const express = require('express');
 const session = require('express-session');
-const sqlite3 = require('sqlite3').verbose();
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
+
+let sqlite3;
+try {
+    // Only attempt to require sqlite3 if we're NOT on Vercel, or if we want to try anyway
+    // On Vercel, native modules often cause FUNCTION_INVOCATION_FAILED if binaries are missing
+    sqlite3 = require('sqlite3').verbose();
+} catch (e) {
+    console.error('[ERROR] Failed to load sqlite3:', e.message);
+}
 
 const app = express();
 const PORT = 3000;
@@ -47,18 +55,22 @@ try {
 
 let db;
 try {
-    console.log(`[INIT] Opening database: ${dbPath}`);
-    db = new sqlite3.Database(dbPath, (err) => {
-        if (err) console.error(`[ERROR] SQLite open error: ${err.message}`);
-        else console.log('[INIT] Database opened successfully');
-    });
+    if (sqlite3) {
+        console.log(`[INIT] Opening database: ${dbPath}`);
+        db = new sqlite3.Database(dbPath, (err) => {
+            if (err) console.error(`[ERROR] SQLite open error: ${err.message}`);
+            else console.log('[INIT] Database opened successfully');
+        });
+    } else {
+        throw new Error('sqlite3 module not available');
+    }
 } catch (e) {
     console.error(`[ERROR] Failed to initialize SQLite: ${e.message}`);
     // FALLBACK: Mock DB for Vercel if SQLite fails
     db = {
-        run: (sql, params, cb) => cb(null),
-        get: (sql, params, cb) => cb(null, null),
-        all: (sql, params, cb) => cb(null, [])
+        run: (sql, params, cb) => { if (cb) cb(null); },
+        get: (sql, params, cb) => { if (cb) cb(null, null); },
+        all: (sql, params, cb) => { if (cb) cb(null, []); }
     };
     console.warn('[WARN] Using in-memory mock DB fallback');
 }
