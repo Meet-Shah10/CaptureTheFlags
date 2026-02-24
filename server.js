@@ -33,9 +33,28 @@ const isVercel = process.env.VERCEL || process.env.NOW_BUILDER;
 const dbDir = isVercel ? '/tmp' : './db';
 const dbPath = isVercel ? '/tmp/ctf.db' : './db/ctf.db';
 
-if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
+console.log(`[INIT] Running on Vercel: ${!!isVercel}`);
+console.log(`[INIT] DB Directory: ${dbDir}`);
 
-const db = new sqlite3.Database(dbPath);
+try {
+    if (!fs.existsSync(dbDir)) {
+        console.log(`[INIT] Creating directory: ${dbDir}`);
+        fs.mkdirSync(dbDir, { recursive: true });
+    }
+} catch (e) {
+    console.error(`[ERROR] Failed to create DB directory: ${e.message}`);
+}
+
+let db;
+try {
+    console.log(`[INIT] Opening database: ${dbPath}`);
+    db = new sqlite3.Database(dbPath, (err) => {
+        if (err) console.error(`[ERROR] SQLite open error: ${err.message}`);
+        else console.log('[INIT] Database opened successfully');
+    });
+} catch (e) {
+    console.error(`[ERROR] Failed to initialize SQLite: ${e.message}`);
+}
 
 // Promisify helpers
 const dbRun = (sql, params = []) => new Promise((res, rej) =>
