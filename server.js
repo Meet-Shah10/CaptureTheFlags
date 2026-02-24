@@ -4,14 +4,15 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
+/* 
 let sqlite3;
 try {
-    // Only attempt to require sqlite3 if we're NOT on Vercel, or if we want to try anyway
-    // On Vercel, native modules often cause FUNCTION_INVOCATION_FAILED if binaries are missing
     sqlite3 = require('sqlite3').verbose();
 } catch (e) {
     console.error('[ERROR] Failed to load sqlite3:', e.message);
 }
+*/
+const sqlite3 = null;
 
 const app = express();
 const PORT = 3000;
@@ -352,17 +353,22 @@ app.post('/api/admin/wipe', requireAdmin, async (req, res) => {
 // ──────────────────────────────────────────────────────────────────────────
 // START
 // ──────────────────────────────────────────────────────────────────────────
-initDB().then(() => {
-    app.listen(PORT, () => {
-        console.log('\n╔══════════════════════════════════════════════════╗');
-        console.log('║         ARTIMAS CTF Server — Running              ║');
-        console.log('╠══════════════════════════════════════════════════╣');
-        console.log(`║  URL    →  http://localhost:${PORT}                 ║`);
-        console.log('║  Admin  →  username: admin  |  pw: ctf_admin      ║');
-        console.log('╚══════════════════════════════════════════════════╝\n');
-        console.log('Share your machine\'s local IP for LAN access.\n');
+if (!isVercel) {
+    initDB().then(() => {
+        app.listen(PORT, () => {
+            console.log('\n╔══════════════════════════════════════════════════╗');
+            console.log('║         ARTIMAS CTF Server — Running              ║');
+            console.log('╠══════════════════════════════════════════════════╣');
+            console.log(`║  URL    →  http://localhost:${PORT}                 ║`);
+            console.log('║  Admin  →  username: admin  |  pw: ctf_admin      ║');
+            console.log('╚══════════════════════════════════════════════════╝\n');
+        });
+    }).catch(err => {
+        console.error('Failed to initialize database:', err);
     });
-}).catch(err => {
-    console.error('Failed to initialize database:', err);
-    process.exit(1);
-});
+} else {
+    // On Vercel, just init DB (if mock, it's fast) and the app is exported
+    initDB().catch(err => console.error('Vercel DB init error:', err));
+}
+
+module.exports = app;
