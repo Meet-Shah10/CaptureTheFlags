@@ -1,21 +1,12 @@
 const express = require('express');
 const session = require('express-session');
+const sqlite3 = require('sqlite3').verbose();
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-/* 
-let sqlite3;
-try {
-    sqlite3 = require('sqlite3').verbose();
-} catch (e) {
-    console.error('[ERROR] Failed to load sqlite3:', e.message);
-}
-*/
-const sqlite3 = null;
-
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // ──────────────────────────────────────────────────────────────────────────
 // FLAG ANSWERS  (server-side only — never exposed to client)
@@ -38,57 +29,20 @@ const FLAG_ORDER = ['flag1', 'flag2', 'flag3', 'flag4', 'flag5', 'flag6', 'flag7
 // ──────────────────────────────────────────────────────────────────────────
 // DATABASE
 // ──────────────────────────────────────────────────────────────────────────
-const isVercel = process.env.VERCEL || process.env.NOW_BUILDER;
-const dbDir = isVercel ? '/tmp' : './db';
-const dbPath = isVercel ? '/tmp/ctf.db' : './db/ctf.db';
+const dbDir = process.env.DB_DIR || './db';
+const dbPath = path.join(dbDir, 'ctf.db');
 
-console.log(`[INIT] Running on Vercel: ${!!isVercel}`);
-console.log(`[INIT] DB Directory: ${dbDir}`);
+if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
 
-try {
-    if (!fs.existsSync(dbDir)) {
-        console.log(`[INIT] Creating directory: ${dbDir}`);
-        fs.mkdirSync(dbDir, { recursive: true });
-    }
-} catch (e) {
-    console.error(`[ERROR] Failed to create DB directory: ${e.message}`);
-}
-
-let db;
-try {
-    if (sqlite3) {
-        console.log(`[INIT] Opening database: ${dbPath}`);
-        db = new sqlite3.Database(dbPath, (err) => {
-            if (err) console.error(`[ERROR] SQLite open error: ${err.message}`);
-            else console.log('[INIT] Database opened successfully');
-        });
-    } else {
-        throw new Error('sqlite3 module not available');
-    }
-} catch (e) {
-    console.error(`[ERROR] Failed to initialize SQLite: ${e.message}`);
-    // FALLBACK: Mock DB for Vercel if SQLite fails
-    db = {
-        run: (sql, params, cb) => { if (cb) cb(null); },
-        get: (sql, params, cb) => { if (cb) cb(null, null); },
-        all: (sql, params, cb) => { if (cb) cb(null, []); }
-    };
-    console.warn('[WARN] Using in-memory mock DB fallback');
-}
+const db = new sqlite3.Database(dbPath);
 
 // Promisify helpers
-const dbRun = (sql, params = []) => new Promise((res, rej) => {
-    if (!db) return res();
-    db.run(sql, params, function (err) { err ? rej(err) : res(this); });
-});
-const dbGet = (sql, params = []) => new Promise((res, rej) => {
-    if (!db) return res(null);
-    db.get(sql, params, (err, row) => { err ? rej(err) : res(row); });
-});
-const dbAll = (sql, params = []) => new Promise((res, rej) => {
-    if (!db) return res([]);
-    db.all(sql, params, (err, rows) => { err ? rej(err) : res(rows); });
-});
+const dbRun = (sql, params = []) => new Promise((res, rej) =>
+    db.run(sql, params, function (err) { err ? rej(err) : res(this); }));
+const dbGet = (sql, params = []) => new Promise((res, rej) =>
+    db.get(sql, params, (err, row) => { err ? rej(err) : res(row); }));
+const dbAll = (sql, params = []) => new Promise((res, rej) =>
+    db.all(sql, params, (err, rows) => { err ? rej(err) : res(rows); }));
 
 async function initDB() {
     try {
@@ -353,22 +307,20 @@ app.post('/api/admin/wipe', requireAdmin, async (req, res) => {
 // ──────────────────────────────────────────────────────────────────────────
 // START
 // ──────────────────────────────────────────────────────────────────────────
-if (!isVercel) {
-    initDB().then(() => {
-        app.listen(PORT, () => {
-            console.log('\n╔══════════════════════════════════════════════════╗');
-            console.log('║         ARTIMAS CTF Server — Running              ║');
-            console.log('╠══════════════════════════════════════════════════╣');
-            console.log(`║  URL    →  http://localhost:${PORT}                 ║`);
-            console.log('║  Admin  →  username: admin  |  pw: ctf_admin      ║');
-            console.log('╚══════════════════════════════════════════════════╝\n');
-        });
-    }).catch(err => {
-        console.error('Failed to initialize database:', err);
+// ──────────────────────────────────────────────────────────────────────────
+// START
+// ──────────────────────────────────────────────────────────────────────────
+initDB().then(() => {
+    app.listen(PORT, () => {
+        console.log('\n╔══════════════════════════════════════════════════╗');
+        console.log('║         ARTIMAS CTF Server — Running              ║');
+        console.log('╠══════════════════════════════════════════════════╣');
+        console.log(`║  URL    →  http://localhost:${PORT}                 ║`);
+        console.log('║  Admin  →  username: admin  |  pw: ctf_admin      ║');
+        console.log('╚══════════════════════════════════════════════════╝\n');
+        console.log("Share your machine's local IP for LAN access.\n");
     });
-} else {
-    // On Vercel, just init DB (if mock, it's fast) and the app is exported
-    initDB().catch(err => console.error('Vercel DB init error:', err));
-}
-
-module.exports = app;
+}).catch(err => {
+    console.error('Failed to initialize database:', err);
+    process.exit(1);
+});
