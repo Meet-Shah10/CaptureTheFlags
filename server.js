@@ -54,34 +54,40 @@ try {
     });
 } catch (e) {
     console.error(`[ERROR] Failed to initialize SQLite: ${e.message}`);
+    // FALLBACK: Mock DB for Vercel if SQLite fails
+    db = {
+        run: (sql, params, cb) => cb(null),
+        get: (sql, params, cb) => cb(null, null),
+        all: (sql, params, cb) => cb(null, [])
+    };
+    console.warn('[WARN] Using in-memory mock DB fallback');
 }
 
 // Promisify helpers
-const dbRun = (sql, params = []) => new Promise((res, rej) =>
-    db.run(sql, params, function (err) { err ? rej(err) : res(this); }));
-const dbGet = (sql, params = []) => new Promise((res, rej) =>
-    db.get(sql, params, (err, row) => { err ? rej(err) : res(row); }));
-const dbAll = (sql, params = []) => new Promise((res, rej) =>
-    db.all(sql, params, (err, rows) => { err ? rej(err) : res(rows); }));
+const dbRun = (sql, params = []) => new Promise((res, rej) => {
+    if (!db) return res();
+    db.run(sql, params, function (err) { err ? rej(err) : res(this); });
+});
+const dbGet = (sql, params = []) => new Promise((res, rej) => {
+    if (!db) return res(null);
+    db.get(sql, params, (err, row) => { err ? rej(err) : res(row); });
+});
+const dbAll = (sql, params = []) => new Promise((res, rej) => {
+    if (!db) return res([]);
+    db.all(sql, params, (err, rows) => { err ? rej(err) : res(rows); });
+});
 
 async function initDB() {
-    await dbRun(`
-        CREATE TABLE IF NOT EXISTS users (
-            id         INTEGER PRIMARY KEY AUTOINCREMENT,
-            username   TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            role       TEXT NOT NULL DEFAULT 'participant',
-            created_at INTEGER NOT NULL
         )
     `);
     await dbRun(`
-        CREATE TABLE IF NOT EXISTS user_progress (
-            id         INTEGER PRIMARY KEY AUTOINCREMENT,
-            username   TEXT NOT NULL,
-            flag_id    TEXT NOT NULL,
-            solved_at  INTEGER NOT NULL,
-            UNIQUE(username, flag_id)
-        )
+        CREATE TABLE IF NOT EXISTS user_progress(
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        username   TEXT NOT NULL,
+        flag_id    TEXT NOT NULL,
+        solved_at  INTEGER NOT NULL,
+        UNIQUE(username, flag_id)
+    )
     `);
 
     // Create default admin if none exists
@@ -328,11 +334,11 @@ initDB().then(() => {
         console.log('║         ARTIMAS CTF Server — Running              ║');
         console.log('╠══════════════════════════════════════════════════╣');
         console.log(`║  URL    →  http://localhost:${PORT}                 ║`);
-        console.log('║  Admin  →  username: admin  |  pw: ctf_admin      ║');
-        console.log('╚══════════════════════════════════════════════════╝\n');
-        console.log('Share your machine\'s local IP for LAN access.\n');
-    });
-}).catch(err => {
+    console.log('║  Admin  →  username: admin  |  pw: ctf_admin      ║');
+    console.log('╚══════════════════════════════════════════════════╝\n');
+    console.log('Share your machine\'s local IP for LAN access.\n');
+});
+}).catch (err => {
     console.error('Failed to initialize database:', err);
     process.exit(1);
 });
