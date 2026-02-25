@@ -67,19 +67,20 @@ This guide contains the flags and solving techniques for all 10 challenges in th
 
 ---
 
-### 🚩 Flag 6: Profile Trace (Harder — Assemble the Handle)
+### 🚩 Flag 6: Profile Trace (Harder — Decode, Assemble, Inspect Source)
 - **Flag**: `ARTIMAS{0s1nt_pr0f1l3_tr4c3d}`
-- **Challenge**: Reconstructing a full username from a partially redacted intel report.
+- **Challenge**: Reconstruct a username from encoded/obfuscated fragments, find the profile, then inspect the page source.
 - **How to crack**:
-  1. Read the intercepted intel report on the challenge page.
-  2. Notice the visible fields:
-     - `FIELD_01  Forum alias   : artimas`
-     - `FIELD_02  Activity tag  : ctf_player`
-     - `FIELD_03  Full handle   : ████████████████████` (redacted)
-  3. Assemble the full handle: `artimas` + `_ctf_` + `player` = **`artimas_ctf_player`**
-     - The separator `_ctf_` connects the forum alias to the activity tag.
-  4. Type `artimas_ctf_player` into the simulated search terminal on the page.
-  5. Click the resulting **Public Profile** link → the flag is displayed on the profile page.
+  1. Read the intercepted intel report. The fragments are **obfuscated**:
+     - `FIELD_01  Forum alias   : YXJ0aW1hcw==` → **Base64 decode** → `artimas`
+     - `FIELD_02  Activity tag  : reyalp_ftc` → **Reverse the string** → `ctf_player`
+  2. Combine with separator: `artimas` + `_` + `ctf_player` = **`artimas_ctf_player`**
+  3. Enter `artimas_ctf_player` into the simulated search terminal → click the profile link.
+  4. The profile page has 2 gists but **no visible flag**. The gist text says "Real investigators check the source."
+  5. **View page source** (Ctrl+U or right-click → View Source) → find the HTML comment at the bottom:
+     ```html
+     <!-- Flag: ARTIMAS{0s1nt_pr0f1l3_tr4c3d} -->
+     ```
 
 ---
 
