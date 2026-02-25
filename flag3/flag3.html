@@ -174,19 +174,21 @@
     <div class="container">
         <div class="card">
             <div class="eyebrow">// Intercepted Transmission</div>
-            <div class="title">🔐 Decode the Signal</div>
-            <p class="subtitle">An encoded message was intercepted mid-transmission. The contents are scrambled but
-                decodable. Can you reverse it?</p>
+            <div class="title">🔐 Decrypt the Payload</div>
+            <p class="subtitle">An encrypted payload was intercepted mid-transmission. Multiple transformations were
+                applied before it was sent. Can you reverse all of them and recover the original message?</p>
 
             <div class="signal-label">// Encoded Payload</div>
-            <div class="encoded-box" id="encodedText">QVJUSU1BU3tiYXNlNjRfZGVjb2RlZF9zdWNjZXNzZnVsbHl9</div>
-            <button class="btn" onclick="doCopy()">📋 Copy Signal</button>
+            <div class="encoded-box" id="encodedText">
+                MDIwNjEyMGExOTA3MTAyZjNlMmMyNjE5MmIzMTNlMWMzODI3M2EzMTM0MzAwYjM2MjYzMTJhMjYzMDNi</div>
+            <button class="btn" onclick="doCopy()">📋 Copy Payload</button>
             <div class="copied" id="copied"></div>
 
             <div class="hint-block">
                 <span class="hint-label">💡 Analyst Note</span>
-                <span class="hint-text">This encoding scheme uses A–Z, a–z, 0–9, + and / characters. Most CTF tools and
-                    online decoders support it natively.</span>
+                <span class="hint-text">Data may have been transformed more than once before transmission.
+                    Unravelling it requires applying each reversal in the correct order. Think carefully
+                    about what each layer could be before reaching for a tool.</span>
             </div>
         </div>
     </div>

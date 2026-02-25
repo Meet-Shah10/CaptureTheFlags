@@ -27,13 +27,23 @@ This guide contains the flags and solving techniques for all 10 challenges in th
 
 ---
 
-### 🚩 Flag 3: Base64 Decoding
-- **Flag**: `ARTIMAS{base64_decoded_successfully}`
-- **Challenge**: The flag is encoded using the Base64 algorithm.
+### 🚩 Flag 3: Multi-Layer Crypto (XOR → Hex → Base64)
+- **Flag**: `ARTIMAS{xor_hex_layers_peeled}`
+- **Challenge**: The payload has been transformed through three layers before transmission.
 - **How to crack**:
-  1. Take the string: `QVJUSU1BU3tiYXNlNjRfZGVjb2RlZF9zdWNjZXNzZnVsbHl9`.
-  2. Decode it via terminal: `echo "..." | base64 -d`
-  3. Or via browser console: `atob("...")`.
+  1. Take the payload from the challenge page: `MDIwNjEyMGExOTA3MTAyZjNlMmMyNjE5MmIzMTNlMWMzODI3M2EzMTM0MzAwYjM2MjYzMTJhMjYzMDNi`
+  2. **Layer 1 — Base64 decode**: `base64.b64decode(payload)` → gives a hex string.
+  3. **Layer 2 — Hex decode**: `bytes.fromhex(hex_string)` → gives raw XOR bytes.
+  4. **Layer 3 — XOR with key `CTF`** (repeating): `chr(byte ^ ord('CTF'[i%3]))` for each byte.
+  5. Python one-liner:
+     ```python
+     import base64
+     payload = 'MDIwNjEyMGExOTA3MTAyZjNlMmMyNjE5MmIzMTNlMWMzODI3M2EzMTM0MzAwYjM2MjYzMTJhMjYzMDNi'
+     key = b'CTF'
+     hex_s = base64.b64decode(payload).decode()
+     xb = bytes.fromhex(hex_s)
+     print(''.join(chr(b ^ key[i%3]) for i, b in enumerate(xb)))
+     ```
 
 ---
 
@@ -48,26 +58,34 @@ This guide contains the flags and solving techniques for all 10 challenges in th
 
 ---
 
-### 🚩 Flag 5: EXIF Forensics
-- **Flag**: `ARTIMAS{location_identified_correctly}`
-- **Challenge**: Metadata hidden inside an image file.
+### 🚩 Flag 5: Deep EXIF Forensics
+- **Flag**: `ARTIMAS{deeper_than_you_think}`
+- **Challenge**: Metadata hidden inside an image — but not in the obvious field.
 - **How to crack**:
   1. Download `challenge.jpg`.
-  2. **Option A (Terminal - No Tool Needed)**: Run `strings challenge.jpg | grep ARTIMAS`. It might find the flag if it's stored in plain text.
-  3. **Option B (Online)**: Upload the file to [exif.regex.info](https://exif.regex.info/exif.cgi).
-  4. **Option C (Install Tool)**: If you're on Mac, install it via Homebrew: `brew install exiftool`. Then run `exiftool challenge.jpg`.
-  5. Look for the **Image Description** or **Comment** metadata field.
+  2. Run `exiftool challenge.jpg` and read **every** field carefully.
+  3. Notice `Image Description: 2026 IEEE Conference -- Dubai` — this is a **red herring**.
+  4. Look at the `User Comment` field: `QVJUSU1BU3tkZWVwZXJfdGhhbl95b3VfdGhpbmt9`.
+  5. That value is Base64-encoded. Decode it:
+     - Terminal: `echo "QVJUSU1BU3tkZWVwZXJfdGhhbl95b3VfdGhpbmt9" | base64 -d`
+     - Python: `import base64; base64.b64decode("QVJUSU1BU3tkZWVwZXJfdGhhbl95b3VfdGhpbmt9").decode()`
+  6. Result: `ARTIMAS{deeper_than_you_think}`
 
 ---
 
-### 🚩 Flag 6: Profile Trace
+### 🚩 Flag 6: Profile Trace (Harder — Assemble the Handle)
 - **Flag**: `ARTIMAS{0s1nt_pr0f1l3_tr4c3d}`
-- **Challenge**: Tracking a digital footprint across platforms.
+- **Challenge**: Reconstructing a full username from a partially redacted intel report.
 - **How to crack**:
-  1. Note the username: `artimas_ctf_player`.
-  2. **Option A (Simulated Search)**: Use the "Simulated Terminal Search" at the bottom of the challenge page. Type the username and hit Search.
-  3. **Option B (Real OSINT)**: In a real scenario, you'd search this on GitHub or Gists.
-  4. Follow the resulting link to the "Public Profile" to find the lekaed flag.
+  1. Read the intercepted intel report on the challenge page.
+  2. Notice the visible fields:
+     - `FIELD_01  Forum alias   : artimas`
+     - `FIELD_02  Activity tag  : ctf_player`
+     - `FIELD_03  Full handle   : ████████████████████` (redacted)
+  3. Assemble the full handle: `artimas` + `_ctf_` + `player` = **`artimas_ctf_player`**
+     - The separator `_ctf_` connects the forum alias to the activity tag.
+  4. Type `artimas_ctf_player` into the simulated search terminal on the page.
+  5. Click the resulting **Public Profile** link → the flag is displayed on the profile page.
 
 ---
 

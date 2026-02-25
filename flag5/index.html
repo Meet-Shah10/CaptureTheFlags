@@ -182,7 +182,8 @@
             <div class="eyebrow">// OSINT &amp; Steganography</div>
             <div class="title">🌍 Where In The World?</div>
             <p class="subtitle">An intercepted image was recovered from a compromised device. The flag isn't in the
-                pixels — it's hidden <em>inside</em> the file itself. Look beyond what you can see.</p>
+                pixels — it's hidden deep <em>inside</em> the file. What you see first may not be what you're looking
+                for.</p>
             <div class="img-wrap">
                 <img src="challenge.jpg" alt="Mystery Landmark Photo"
                     onerror="this.parentElement.innerHTML='<div style=\'padding:60px 20px;color:#4a5568;font-family:Share Tech Mono,monospace;font-size:.8rem;\'>// challenge.jpg</div>'">
@@ -190,16 +191,15 @@
             <a class="btn" href="challenge.jpg" download="challenge.jpg">📥 Download Image File</a>
             <div class="hint-block">
                 <span class="hint-label">💡 Analyst Note</span>
-                <span class="hint-text">Every photo taken with a camera stores invisible information alongside the
-                    pixels. Photographers, journalists and OSINT analysts read this hidden data all the time. Try
-                    inspecting what's <em>attached</em> to the file itself — not just what you can see. A small shift in
-                    representation can reveal what was hidden.</span>
+                <span class="hint-text">Digital images carry layers of invisible information. Not every field
+                    is obvious — and not everything you find first is the answer. Some data is encoded
+                    before being stored. Look carefully at every field, and decode what seems out of place.
+                </span>
             </div>
             <div class="tags">
-                <span class="tag">exiftool</span>
-                <span class="tag">Jeffrey's EXIF Viewer</span>
-                <span class="tag">exif.regex.info</span>
-                <span class="tag">strings</span>
+                <span class="tag">metadata</span>
+                <span class="tag">file forensics</span>
+                <span class="tag">encoding</span>
             </div>
         </div>
     </div>
