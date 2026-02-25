@@ -27,23 +27,16 @@ This guide contains the flags and solving techniques for all 10 challenges in th
 
 ---
 
-### 🚩 Flag 3: Multi-Layer Crypto (XOR → Hex → Base64)
-- **Flag**: `ARTIMAS{xor_hex_layers_peeled}`
-- **Challenge**: The payload has been transformed through three layers before transmission.
+### 🚩 Flag 3: Multi-Layer Crypto (Hex → Base64)
+- **Flag**: `ARTIMAS{layered_crypto_revealed}`
+- **Challenge**: The payload has been transformed through two layers before transmission.
 - **How to crack**:
-  1. Take the payload from the challenge page: `MDIwNjEyMGExOTA3MTAyZjNlMmMyNjE5MmIzMTNlMWMzODI3M2EzMTM0MzAwYjM2MjYzMTJhMjYzMDNi`
-  2. **Layer 1 — Base64 decode**: `base64.b64decode(payload)` → gives a hex string.
-  3. **Layer 2 — Hex decode**: `bytes.fromhex(hex_string)` → gives raw XOR bytes.
-  4. **Layer 3 — XOR with key `CTF`** (repeating): `chr(byte ^ ord('CTF'[i%3]))` for each byte.
-  5. Python one-liner:
-     ```python
-     import base64
-     payload = 'MDIwNjEyMGExOTA3MTAyZjNlMmMyNjE5MmIzMTNlMWMzODI3M2EzMTM0MzAwYjM2MjYzMTJhMjYzMDNi'
-     key = b'CTF'
-     hex_s = base64.b64decode(payload).decode()
-     xb = bytes.fromhex(hex_s)
-     print(''.join(chr(b ^ key[i%3]) for i, b in enumerate(xb)))
-     ```
+  1. Take the payload from the challenge page: `NDE1MjU0NDk0ZDQxNTM3YjZjNjE3OTY1NzI2NTY0NWY2MzcyNzk3MDc0NmY1ZjcyNjU3NjY1NjE2YzY1NjQ3ZA==`
+  2. **Layer 1 — Base64 decode**: gives a hex string: `415254494d41537b6c6179...647d`
+  3. **Layer 2 — Hex decode**: `bytes.fromhex(hex_string)` → plaintext flag
+  4. Quick solve:
+     - Python: `bytes.fromhex(base64.b64decode(payload).decode()).decode()`
+     - CyberChef: From Base64 → From Hex
 
 ---
 

@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 const FLAG_ANSWERS = {
     flag1: 'ARTIMAS{view_source_reveals_secret}',
     flag2: 'ARTIMAS{found_admin_panel}',
-    flag3: 'ARTIMAS{xor_hex_layers_peeled}',
+    flag3: 'ARTIMAS{layered_crypto_revealed}',
     flag4: 'ARTIMAS{caesar_cipher_cracked}',
     flag5: 'ARTIMAS{deeper_than_you_think}',
     flag6: 'ARTIMAS{0s1nt_pr0f1l3_tr4c3d}',
