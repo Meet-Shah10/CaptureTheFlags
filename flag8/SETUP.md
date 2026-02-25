@@ -5,7 +5,7 @@ Participants receive a password-protected ZIP file and must crack or guess
 the password to extract `flag.txt` and read the flag.
 
 **Flag:** `ARTIMAS{zip_password_cracked}`  
-**ZIP Password:** `artimas2026`  
+**ZIP Password:** `s3cur3_v4ult`  
 **Difficulty:** Beginner  
 **Category:** Cryptography / Forensics
 
@@ -29,7 +29,7 @@ import pyzipper
 with pyzipper.AESZipFile('challenge.zip', 'w',
         compression=pyzipper.ZIP_DEFLATED,
         encryption=pyzipper.WZ_AES) as zf:
-    zf.setpassword(b'artimas2026')
+    zf.setpassword(b's3cur3_v4ult')
     zf.write('flag.txt')
 ```
 
@@ -39,7 +39,7 @@ pip install pyzipper
 python -c "
 import pyzipper
 with pyzipper.AESZipFile('challenge.zip','w',compression=pyzipper.ZIP_DEFLATED,encryption=pyzipper.WZ_AES) as zf:
-    zf.setpassword(b'artimas2026')
+    zf.setpassword(b's3cur3_v4ult')
     zf.write('flag.txt')
 "
 ```
@@ -49,7 +49,7 @@ with pyzipper.AESZipFile('challenge.zip','w',compression=pyzipper.ZIP_DEFLATED,e
 python -c "
 import pyzipper
 with pyzipper.AESZipFile('challenge.zip') as zf:
-    zf.setpassword(b'artimas2026')
+    zf.setpassword(b's3cur3_v4ult')
     print(zf.read('flag.txt').decode())
 "
 # → ARTIMAS{zip_password_cracked}
@@ -88,7 +88,7 @@ with pyzipper.AESZipFile('challenge.zip') as zf:
 
 | Method | Command / Steps |
 |---|---|
-| **Guess it** | Try `artimas`, `artimas2024`, `artimas2026`, `ctf2026` etc. |
+| **Guess it** | Try `artimas`, `artimas2024`, `s3cur3_v4ult`, `ctf2026` etc. |
 | **fcrackzip** | `fcrackzip -u -D -p /usr/share/wordlists/rockyou.txt challenge.zip` |
 | **john** | `zip2john challenge.zip > hash.txt` then `john hash.txt` |
 | **7-Zip (GUI)** | Open ZIP → enter password when prompted |
@@ -96,7 +96,7 @@ with pyzipper.AESZipFile('challenge.zip') as zf:
 
 ```
 Step 1 → Download challenge.zip
-Step 2 → Try cracking the password (or guess: artimas2026)
+Step 2 → Try cracking the password (or guess: s3cur3_v4ult)
 Step 3 → Extract flag.txt
 Step 4 → Read → ARTIMAS{zip_password_cracked} 🏁
 ```

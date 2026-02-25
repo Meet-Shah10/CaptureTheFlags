@@ -53,16 +53,17 @@ This guide contains the flags and solving techniques for all 10 challenges in th
 
 ### 🚩 Flag 5: Deep EXIF Forensics
 - **Flag**: `ARTIMAS{deeper_than_you_think}`
-- **Challenge**: Metadata hidden inside an image — but not in the obvious field.
+- **Challenge**: Metadata hidden inside an image — but not in the obvious field, and not in the usual encoding.
 - **How to crack**:
   1. Download `challenge.jpg`.
   2. Run `exiftool challenge.jpg` and read **every** field carefully.
-  3. Notice `Image Description: 2026 IEEE Conference -- Dubai` — this is a **red herring**.
-  4. Look at the `User Comment` field: `QVJUSU1BU3tkZWVwZXJfdGhhbl95b3VfdGhpbmt9`.
-  5. That value is Base64-encoded. Decode it:
-     - Terminal: `echo "QVJUSU1BU3tkZWVwZXJfdGhhbl95b3VfdGhpbmt9" | base64 -d`
-     - Python: `import base64; base64.b64decode("QVJUSU1BU3tkZWVwZXJfdGhhbl95b3VfdGhpbmt9").decode()`
-  6. Result: `ARTIMAS{deeper_than_you_think}`
+  3. Notice `Image Description: 2026 IEEE Conference -- Dubai` — **red herring**.
+  4. Notice `Artist: ctf_admin@artimas.org` — **another red herring**.
+  5. Look at the `User Comment` field: `415254494d41537b6465657065725f7468616e5f796f755f7468696e6b7d`
+  6. That value is **hex-encoded** (only 0–9, a–f chars). Decode it:
+     - Python: `bytes.fromhex("415254494d41537b6465657065725f7468616e5f796f755f7468696e6b7d").decode()`
+     - CyberChef: From Hex
+  7. Result: `ARTIMAS{deeper_than_you_think}`
 
 ---
 
@@ -92,13 +93,16 @@ This guide contains the flags and solving techniques for all 10 challenges in th
 
 ---
 
-### 🚩 Flag 8: Password Cracking
+### 🚩 Flag 8: Password Cracking (Leetspeak Password)
 - **Flag**: `ARTIMAS{zip_password_cracked}`
-- **Challenge**: A ZIP file protected by a password.
+- **Challenge**: A ZIP file protected by a leetspeak password.
 - **How to crack**:
   1. Download `challenge.zip`.
-  2. Use `john` with `zip2john` or `fcrackzip`.
-  3. The password is `artimas2026`. Extract the `flag.txt` inside.
+  2. Read the hint: it says "secure vault" in leetspeak.
+  3. Convert: `secure` → `s3cur3`, `vault` → `v4ult`, joined with underscore.
+  4. Password: **`s3cur3_v4ult`**
+  5. Extract `flag.txt` using `7z x challenge.zip -ps3cur3_v4ult` or enter in a GUI.
+  6. Alternative: use `fcrackzip` or `john` with a wordlist.
 
 ---
 
